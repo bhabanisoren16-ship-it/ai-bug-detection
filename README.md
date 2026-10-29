@@ -1,7 +1,9 @@
 # AI Bug Detection & Highlighting System
 
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/bhabanisoren16-ship-it/ai-bug-detection)
+
 > **Dual-Phase Automated Defect Localization, Multi-Layer Visual Highlighting & Hardware-Software Co-Verification Engine**  
-> Built strictly in accordance with the blueprint: `ai_software_bug_detection_phase_by_phase.pdf`.
+> Built strictly in accordance with `ai_software_bug_detection_phase_by_phase.pdf` and David J. Agans' *"Debugging: The 9 Indispensable Rules"*.
 
 ---
 
