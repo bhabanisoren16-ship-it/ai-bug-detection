@@ -858,18 +858,13 @@ def _analyze_phase2_circuit(netlist: Dict[str, Any]) -> List[BugDiagnostic]:
 #  Route: Dashboard
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-@app.route("/api/debug-env")
-def debug_env():
-    """Diagnostic endpoint to inspect Vercel environment headers."""
-    return jsonify({
-        "path_info": request.environ.get("PATH_INFO"),
-        "request_uri": request.environ.get("REQUEST_URI"),
-        "raw_uri": request.environ.get("RAW_URI"),
-        "x_forwarded_uri": request.environ.get("HTTP_X_FORWARDED_URI"),
-        "x_matched_path": request.environ.get("HTTP_X_MATCHED_PATH"),
-        "x_now_route_matches": request.environ.get("HTTP_X_NOW_ROUTE_MATCHES"),
-        "all_env_keys": [k for k in request.environ.keys() if "HTTP" in k or "URI" in k or "PATH" in k],
-    }), 200
+@app.after_request
+def add_no_cache_headers(response):
+    """Ensure browsers and CDNs do not cache responses during active development."""
+    response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+    response.headers["Pragma"] = "no-cache"
+    response.headers["Expires"] = "0"
+    return response
 
 
 @app.route("/")
