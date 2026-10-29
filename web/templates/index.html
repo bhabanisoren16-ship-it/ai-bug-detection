@@ -7,7 +7,7 @@
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
     <title>AI & Software Bug Detection & Highlighting System</title>
-    <link rel="stylesheet" href="/static/css/style.css?v=2.2">
+    <link rel="stylesheet" href="/static/css/style.css?v=2.3">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -24,9 +24,6 @@
             </div>
         </div>
         <div class="header-badges">
-            <button id="btn-header-agans" class="btn btn-secondary btn-sm" title="View David J. Agans' 9 Indispensable Rules">
-                <span>📖</span> Agans' 9 Rules Protocol
-            </button>
             <span class="pill-badge">SARIF v2.1.0 Ready</span>
             <span class="pill-badge neon-badge">
                 <span class="pulse-dot"></span> Engine Online
@@ -44,9 +41,6 @@
         </button>
         <button class="tab-btn" data-tab="tab-phase2">
             <span class="tab-icon">🔌</span> Phase 2: Circuit & Netlist Debugging
-        </button>
-        <button class="tab-btn" data-tab="tab-agans">
-            <span class="tab-icon">📖</span> Agans' 9 Indispensable Rules
         </button>
     </nav>
 
@@ -203,27 +197,7 @@
             </div>
         </section>
 
-        <!-- ================= AGANS' 9 RULES PANEL ================= -->
-        <section id="tab-agans" class="tab-panel">
-            <div class="agans-hero-card">
-                <div>
-                    <div class="agans-hero-title">📖 David J. Agans' 9 Indispensable Rules for Debugging</div>
-                    <div class="agans-hero-subtitle">
-                        From the seminal engineering classic <em>"Debugging: The 9 Indispensable Rules for Finding Even the Most Elusive Software and Hardware Problems"</em> by David J. Agans.<br>
-                        Our dual-phase AI engine integrates each rule as a formal, executable debugging principle across both software code and hardware circuit domains.
-                    </div>
-                </div>
-                <div style="display: flex; gap: 8px; flex-shrink: 0;">
-                    <span class="pill-badge" style="background: #eff6ff; color: #1558C9; border-color: #93c5fd;">Software &amp; Hardware Dual-Phase</span>
-                    <span class="pill-badge neon-badge">9 Maxims Active</span>
-                </div>
-            </div>
 
-            <!-- 9 Rules Interactive Grid (Populated via /api/agans-rules) -->
-            <div id="agans-rules-grid" class="agans-grid">
-                <!-- Dynamically loaded by app.js -->
-            </div>
-        </section>
 
         <!-- ================= RULE CATALOG SECTION ================= -->
         <section class="catalog-section">
@@ -256,7 +230,7 @@
 
     </main>
 
-    <script src="/static/js/app.js?v=2.2"></script>
+    <script src="/static/js/app.js?v=2.3"></script>
 </body>
 </html>
 

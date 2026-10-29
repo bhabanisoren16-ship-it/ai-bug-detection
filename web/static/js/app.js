@@ -14,7 +14,6 @@ document.addEventListener("DOMContentLoaded", () => {
     initSampleButtons();
     initCatalogToggle();
     loadCatalogRules();
-    initAgansProtocol();
     initCheckPlugButtons();
 
     // Default sample load
@@ -591,66 +590,7 @@ async function loadCatalogRules() {
     }
 }
 
-// ── David J. Agans' 9 Indispensable Rules Protocol Implementation ───────────
-function initAgansProtocol() {
-    const btn = document.getElementById("btn-header-agans");
-    if (btn) {
-        btn.addEventListener("click", () => {
-            const agansTab = document.querySelector('.tab-btn[data-tab="tab-agans"]');
-            if (agansTab) {
-                agansTab.click();
-                const agansSection = document.getElementById("tab-agans");
-                if (agansSection) {
-                    agansSection.scrollIntoView({ behavior: "smooth" });
-                }
-            }
-        });
-    }
-    loadAgansRules();
-}
 
-async function loadAgansRules() {
-    const grid = document.getElementById("agans-rules-grid");
-    if (!grid) return;
-
-    try {
-        const res = await fetch("/api/agans-rules");
-        const data = await res.json();
-        const rules = data.rules || [];
-
-        let html = "";
-        rules.forEach(r => {
-            html += `
-                <div class="agans-card">
-                    <div class="agans-card-header">
-                        <span class="agans-rule-number">RULE ${r.rule_number}</span>
-                        <span style="font-size: 11px; color: var(--color-cobalt); font-weight: 700; font-family: monospace;">${escapeHtml(r.telemetry_hook)}</span>
-                    </div>
-                    <div class="agans-card-title">${escapeHtml(r.title)}</div>
-                    <div class="agans-mantra">"${escapeHtml(r.mantra)}"</div>
-                    <p style="font-size: 12px; color: var(--text-muted); line-height: 1.5;">${escapeHtml(r.summary)}</p>
-                    
-                    <div class="agans-section-block">
-                        <div class="agans-section-label code-label">
-                            <span>💻</span> Software Code Implementation:
-                        </div>
-                        <div class="agans-section-text">${escapeHtml(r.software_application)}</div>
-                    </div>
-
-                    <div class="agans-section-block">
-                        <div class="agans-section-label circuit-label">
-                            <span>🔌</span> Hardware Circuit Implementation:
-                        </div>
-                        <div class="agans-section-text">${escapeHtml(r.circuit_application)}</div>
-                    </div>
-                </div>
-            `;
-        });
-        grid.innerHTML = html;
-    } catch (err) {
-        console.error("Failed to load Agans rules:", err);
-    }
-}
 
 // ── Rule 9: Live Fix Verification ("If You Didn't Fix It, It Ain't Fixed") ───
 async function verifyFixWithRule9(btn) {
