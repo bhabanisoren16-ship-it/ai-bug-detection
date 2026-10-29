@@ -12,5 +12,25 @@ if str(PROJECT_ROOT) not in sys.path:
 
 from web.app import app
 
-# Vercel serverless WSGI handler
-# The 'app' symbol is automatically handled by @vercel/python
+
+class VercelPathFixMiddleware:
+    """Restores the original request path from Vercel's proxy headers."""
+    def __init__(self, wsgi_app):
+        self.wsgi_app = wsgi_app
+
+    def __call__(self, environ, start_response):
+        raw_uri = environ.get("HTTP_X_FORWARDED_URI") or environ.get("HTTP_X_MATCHED_PATH")
+        if raw_uri and not raw_uri.startswith("/api/index"):
+            environ["PATH_INFO"] = raw_uri.split("?")[0]
+        else:
+            path = environ.get("PATH_INFO", "")
+            for prefix in ("/api/index.py", "/api/index"):
+                if path.startswith(prefix):
+                    rest = path[len(prefix):]
+                    environ["PATH_INFO"] = rest if (rest and rest.startswith("/")) else ("/" + rest.lstrip("/"))
+                    break
+        return self.wsgi_app(environ, start_response)
+
+
+# Wrap Flask WSGI app with Vercel path normalizer
+app.wsgi_app = VercelPathFixMiddleware(app.wsgi_app)
