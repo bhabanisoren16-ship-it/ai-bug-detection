@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI & Software Bug Detection & Highlighting System</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <!-- Top Application Bar -->
+    <header class="app-header">
+        <div class="brand">
+            <div class="brand-icon">⚡</div>
+            <div>
+                <div class="brand-title">AI Bug Detection & Highlighting System</div>
+                <div class="brand-subtitle">Dual-Phase Automated Defect Localization & Multi-Layer Visual Highlighting</div>
+            </div>
+        </div>
+        <div class="header-badges">
+            <button id="btn-header-agans" class="btn btn-secondary btn-sm" title="View David J. Agans' 9 Indispensable Rules">
+                <span>📖</span> Agans' 9 Rules Protocol
+            </button>
+            <span class="pill-badge">SARIF v2.1.0 Ready</span>
+            <span class="pill-badge neon-badge">
+                <span class="pulse-dot"></span> Engine Online
+            </span>
+            <button id="btn-export-sarif" class="btn btn-secondary btn-sm">
+                <span>📥</span> Export SARIF
+            </button>
+        </div>
+    </header>
+
+    <!-- Navigation Tabs -->
+    <nav class="nav-tabs">
+        <button class="tab-btn active" data-tab="tab-phase1">
+            <span class="tab-icon">💻</span> Phase 1: Code Debugging
+        </button>
+        <button class="tab-btn" data-tab="tab-phase2">
+            <span class="tab-icon">🔌</span> Phase 2: Circuit & Netlist Debugging
+        </button>
+        <button class="tab-btn" data-tab="tab-agans">
+            <span class="tab-icon">📖</span> Agans' 9 Indispensable Rules
+        </button>
+    </nav>
+
+    <!-- Main Workspace -->
+    <main class="main-content">
+
+        <!-- ================= PHASE 1 PANEL ================= -->
+        <section id="tab-phase1" class="tab-panel active">
+            <div class="split-view">
+                
+                <!-- Left: Source Code Editor -->
+                <div class="panel-card">
+                    <div class="panel-header">
+                        <div class="panel-title">
+                            <span>📝</span> Source Code Editor
+                        </div>
+                        <div class="panel-actions">
+                            <button id="btn-sample-py" class="btn btn-secondary btn-sm">Load Python Sample</button>
+                            <button id="btn-sample-c" class="btn btn-secondary btn-sm">Load C Sample</button>
+                        </div>
+                    </div>
+                    
+                    <div class="editor-wrapper">
+                        <div id="code-gutter" class="line-numbers">1</div>
+                        <textarea id="code-editor" class="code-textarea" spellcheck="false" placeholder="Paste C, Python, or Rust code here..."></textarea>
+                    </div>
+
+                    <div style="padding: 14px 20px; background: #f8fafc; border-top: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center;">
+                        <span style="font-size: 12px; color: var(--text-dim);">Supported: AST Parsing, Taint Tracking, Div-by-Zero, Memory Lifecycle, Off-by-One</span>
+                        <div style="display: flex; gap: 8px;">
+                            <button id="btn-check-plug-code" class="btn btn-secondary" title="Agans Rule 7: Fast-fail pre-flight sanity check">
+                                <span>🔌</span> Check the Plug (Rule 7)
+                            </button>
+                            <button id="btn-analyze-code" class="btn btn-primary">
+                                <span>⚡</span> Run Full Phase 1 Analysis
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right: Visual Bug Diagnostics -->
+                <div class="panel-card">
+                    <div class="panel-header">
+                        <div class="panel-title">
+                            <span>🎯</span> Visual Diagnostics & Telemetry
+                        </div>
+                        <span style="font-size: 11px; color: var(--text-dim); text-transform: uppercase; font-weight: 600;">LSP & SARIF Overlay</span>
+                    </div>
+
+                    <!-- Summary Stats Bar -->
+                    <div class="stats-bar">
+                        <div class="stat-item">
+                            <span class="stat-label">Total Defects</span>
+                            <span id="stat-code-total" class="stat-value">0</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Critical / Errors</span>
+                            <span id="stat-code-crit" class="stat-value" style="color: var(--color-critical);">0</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Warnings</span>
+                            <span id="stat-code-warn" class="stat-value" style="color: var(--color-warning);">0</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Run Status</span>
+                            <span id="stat-code-status" class="stat-value" style="font-size: 14px; color: var(--color-success);">CLEAN</span>
+                        </div>
+                    </div>
+
+                    <!-- Diagnostics Scroll Area -->
+                    <div id="code-results" class="results-scroll">
+                        <div class="empty-state">
+                            <div class="empty-icon">🔍</div>
+                            <p><strong>Ready for Inspection</strong><br>Click "Run Full Phase 1 Analysis" to detect memory bugs, tainted sinks, division by zero, and logic flaws.</p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+
+        <!-- ================= PHASE 2 PANEL ================= -->
+        <section id="tab-phase2" class="tab-panel">
+            <div class="split-view">
+                
+                <!-- Left: Hardware Netlist JSON Editor -->
+                <div class="panel-card">
+                    <div class="panel-header">
+                        <div class="panel-title">
+                            <span>📐</span> Elaborated Circuit Netlist (JSON)
+                        </div>
+                        <div class="panel-actions">
+                            <button id="btn-sample-netlist" class="btn btn-secondary btn-sm">Load Default Netlist</button>
+                        </div>
+                    </div>
+
+                    <div class="editor-wrapper">
+                        <div id="netlist-gutter" class="line-numbers">1</div>
+                        <textarea id="netlist-editor" class="code-textarea" spellcheck="false" placeholder="Paste elaborated netlist JSON here..."></textarea>
+                    </div>
+
+                    <div style="padding: 14px 20px; background: #f8fafc; border-top: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center;">
+                        <span style="font-size: 12px; color: var(--text-dim);">Checks: Static Timing (STA), Clock Domain Crossing (CDC), ERC, Floating Nets</span>
+                        <div style="display: flex; gap: 8px;">
+                            <button id="btn-check-plug-circuit" class="btn btn-secondary" title="Agans Rule 7: Fast-fail pre-flight sanity check on circuit netlist">
+                                <span>🔌</span> Check the Plug (Rule 7)
+                            </button>
+                            <button id="btn-analyze-circuit" class="btn btn-primary">
+                                <span>⚡</span> Run Full Phase 2 Analysis
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right: Circuit Cross-Probe Results -->
+                <div class="panel-card">
+                    <div class="panel-header">
+                        <div class="panel-title">
+                            <span>🔬</span> 4-View Synchronized Cross-Probe
+                        </div>
+                        <span style="font-size: 11px; color: var(--text-dim); text-transform: uppercase; font-weight: 600;">RTL + Schematic + VCD + GDSII</span>
+                    </div>
+
+                    <!-- Summary Stats Bar -->
+                    <div class="stats-bar">
+                        <div class="stat-item">
+                            <span class="stat-label">Total Violations</span>
+                            <span id="stat-circ-total" class="stat-value">0</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Timing (Slack &lt; 0)</span>
+                            <span id="stat-circ-crit" class="stat-value" style="color: var(--color-critical);">0</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Floating Nets</span>
+                            <span id="stat-circ-violet" class="stat-value" style="color: var(--color-violet);">0</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Design Status</span>
+                            <span id="stat-circ-status" class="stat-value" style="font-size: 14px; color: var(--color-success);">CLEAN</span>
+                        </div>
+                    </div>
+
+                    <!-- Diagnostics Scroll Area -->
+                    <div id="circuit-results" class="results-scroll">
+                        <div class="empty-state">
+                            <div class="empty-icon">🔌</div>
+                            <p><strong>Ready for Circuit Verification</strong><br>Click "Run Full Phase 2 Analysis" to verify setup/hold slacks, asynchronous clock crossings, and floating pins.</p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- ================= AGANS' 9 RULES PANEL ================= -->
+        <section id="tab-agans" class="tab-panel">
+            <div class="agans-hero-card">
+                <div>
+                    <div class="agans-hero-title">📖 David J. Agans' 9 Indispensable Rules for Debugging</div>
+                    <div class="agans-hero-subtitle">
+                        From the seminal engineering classic <em>"Debugging: The 9 Indispensable Rules for Finding Even the Most Elusive Software and Hardware Problems"</em> by David J. Agans.<br>
+                        Our dual-phase AI engine integrates each rule as a formal, executable debugging principle across both software code and hardware circuit domains.
+                    </div>
+                </div>
+                <div style="display: flex; gap: 8px; flex-shrink: 0;">
+                    <span class="pill-badge" style="background: #eff6ff; color: #1558C9; border-color: #93c5fd;">Software &amp; Hardware Dual-Phase</span>
+                    <span class="pill-badge neon-badge">9 Maxims Active</span>
+                </div>
+            </div>
+
+            <!-- 9 Rules Interactive Grid (Populated via /api/agans-rules) -->
+            <div id="agans-rules-grid" class="agans-grid">
+                <!-- Dynamically loaded by app.js -->
+            </div>
+        </section>
+
+        <!-- ================= RULE CATALOG SECTION ================= -->
+        <section class="catalog-section">
+            <div class="catalog-header">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 16px;">📖</span>
+                    <strong>Production Detection Rule &amp; Highlight Signature Catalog</strong>
+                    <span class="pill-badge">10 Rules Loaded</span>
+                </div>
+                <span class="toggle-icon" style="color: var(--text-dim);">▲</span>
+            </div>
+            <div id="catalog-body">
+                <table class="catalog-table">
+                    <thead>
+                        <tr>
+                            <th>Rule ID</th>
+                            <th>Phase</th>
+                            <th>Bug Category</th>
+                            <th>Formal Detection Predicate</th>
+                            <th>Automated Fix Strategy</th>
+                            <th>Agans Rule Reference</th>
+                        </tr>
+                    </thead>
+                    <tbody id="catalog-tbody">
+                        <!-- Populated by app.js -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+    </main>
+
+    <script src="/static/js/app.js"></script>
+</body>
+</html>
+

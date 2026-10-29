@@ -1,0 +1,65 @@
+{
+  "module": "core_alu",
+  "clocks": {
+    "sys_clk":  { "period_ns": 2.0 },
+    "io_clk":   { "period_ns": 5.0 }
+  },
+  "gates": {
+    "dff_launch":   { "type": "DFF",   "inputs": ["d_in", "sys_clk"],       "outputs": ["q_launch"],     "clock": "sys_clk"  },
+    "and_g1":       { "type": "AND2",  "inputs": ["q_launch", "sel"],       "outputs": ["and_out"]                           },
+    "lut4_add":     { "type": "LUT4",  "inputs": ["and_out", "cin"],        "outputs": ["sum_out"]                           },
+    "carry_g1":     { "type": "CARRY", "inputs": ["and_out", "cin"],        "outputs": ["carry_out"]                         },
+    "mux_sel":      { "type": "MUX2",  "inputs": ["sum_out", "carry_out", "mux_ctrl"], "outputs": ["mux_out"]                },
+    "dff_capture":  { "type": "DFF",   "inputs": ["mux_out", "sys_clk"],    "outputs": ["q_capture"],    "clock": "sys_clk"  },
+    "dff_io_src":   { "type": "DFF",   "inputs": ["io_data", "io_clk"],     "outputs": ["io_q"],         "clock": "io_clk"   },
+    "dff_io_dst":   { "type": "DFF",   "inputs": ["cdc_wire", "sys_clk"],   "outputs": ["io_sync_out"],  "clock": "sys_clk"  }
+  },
+  "nets": {
+    "d_in":       { "drivers": ["PAD_IN"],         "sinks": ["dff_launch"]   },
+    "q_launch":   { "drivers": ["dff_launch"],     "sinks": ["and_g1"]       },
+    "sel":        { "drivers": ["PAD_SEL"],        "sinks": ["and_g1"]       },
+    "and_out":    { "drivers": ["and_g1"],         "sinks": ["lut4_add", "carry_g1"] },
+    "cin":        { "drivers": ["PAD_CIN"],        "sinks": ["lut4_add", "carry_g1"] },
+    "sum_out":    { "drivers": ["lut4_add"],       "sinks": ["mux_sel"]      },
+    "carry_out":  { "drivers": ["carry_g1"],       "sinks": ["mux_sel"]      },
+    "mux_ctrl":   { "drivers": [],                 "sinks": ["mux_sel"]      },
+    "mux_out":    { "drivers": ["mux_sel"],        "sinks": ["dff_capture"]  },
+    "q_capture":  { "drivers": ["dff_capture"],    "sinks": ["PAD_OUT"]      },
+    "io_data":    { "drivers": ["PAD_IO"],         "sinks": ["dff_io_src"]   },
+    "io_q":       { "drivers": ["dff_io_src"],     "sinks": ["cdc_buf"]      },
+    "cdc_wire":   { "drivers": ["cdc_buf", "stale_driver"], "sinks": ["dff_io_dst"], "sync_stages": 0 },
+    "io_sync_out":{ "drivers": ["dff_io_dst"],     "sinks": ["PAD_IO_OUT"]   }
+  },
+  "timing_paths": [
+    {
+      "id": "path_critical",
+      "start_point": "dff_launch",
+      "end_point": "dff_capture",
+      "clock": "sys_clk",
+      "through": ["and_g1", "lut4_add", "carry_g1", "mux_sel"],
+      "clk_period_ns": 2.0,
+      "cap_clk_delay_ns": 0.15,
+      "lnch_clk_delay_ns": 0.12,
+      "clk_to_q_ns": 0.18,
+      "comb_delay_ns": 1.95,
+      "setup_ns": 0.08,
+      "hold_ns": 0.04,
+      "uncertainty_ns": 0.03
+    },
+    {
+      "id": "path_safe",
+      "start_point": "dff_io_src",
+      "end_point": "dff_io_dst",
+      "clock": "io_clk",
+      "through": ["cdc_buf"],
+      "clk_period_ns": 5.0,
+      "cap_clk_delay_ns": 0.10,
+      "lnch_clk_delay_ns": 0.10,
+      "clk_to_q_ns": 0.15,
+      "comb_delay_ns": 0.30,
+      "setup_ns": 0.06,
+      "hold_ns": 0.04,
+      "uncertainty_ns": 0.02
+    }
+  ]
+}
