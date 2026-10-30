@@ -10,7 +10,6 @@ document.addEventListener("DOMContentLoaded", () => {
     initSampleButtons();
     initCatalogToggle();
     loadCatalogRules();
-    loadAgansRules();
 
     // Default sample load: Python defect sample
     loadSampleCode("python");

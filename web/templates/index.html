@@ -7,7 +7,7 @@
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
     <title>AI Bug Detection &amp; Highlighting System</title>
-    <link rel="stylesheet" href="/static/css/style.css?v=7.0">
+    <link rel="stylesheet" href="/static/css/style.css?v=8.0">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -34,16 +34,13 @@
         </div>
     </header>
 
-    <!-- Navigation Tabs (Core Problem Statement: Software Code & Hardware Circuit + Agans' 9 Rules) -->
+    <!-- Navigation Tabs (Core Problem Statement: Software Code & Hardware Circuit) -->
     <nav class="nav-tabs">
         <button class="tab-btn active" data-tab="tab-phase1">
             <span class="tab-icon">💻</span> Phase 1: Software Code Debugging
         </button>
         <button class="tab-btn" data-tab="tab-phase2">
             <span class="tab-icon">🔌</span> Phase 2: Hardware Netlist Debugging
-        </button>
-        <button class="tab-btn" data-tab="tab-agans">
-            <span class="tab-icon">📖</span> Agans' 9 Indispensable Rules
         </button>
     </nav>
 
@@ -195,29 +192,6 @@
         </section>
 
 
-        <!-- ================= AGANS' 9 RULES PANEL ================= -->
-        <section id="tab-agans" class="tab-panel">
-            <div class="agans-hero-card">
-                <div>
-                    <div class="agans-hero-title">📖 David J. Agans' 9 Indispensable Rules for Debugging</div>
-                    <div class="agans-hero-subtitle">
-                        From the engineering classic <em>"Debugging: The 9 Indispensable Rules for Finding Even the Most Elusive Software and Hardware Problems"</em> by David J. Agans.<br>
-                        Our dual-phase engine connects each diagnostic rule to formal software AST guards and hardware circuit telemetry contracts.
-                    </div>
-                </div>
-                <div style="display: flex; gap: 8px; flex-shrink: 0; align-items: center; flex-wrap: wrap;">
-                    <span class="pill-badge" style="background: var(--color-info-bg); color: var(--color-info-text); border-color: var(--color-info-border);">Dual-Phase Mapping</span>
-                    <span class="pill-badge neon-badge">9 Maxims Active</span>
-                </div>
-            </div>
-
-            <!-- 9 Rules Interactive Grid (Populated via /api/agans-rules) -->
-            <div id="agans-rules-grid" class="agans-grid">
-                <!-- Dynamically loaded by app.js -->
-            </div>
-        </section>
-
-
         <!-- ================= RULE CATALOG SECTION ================= -->
         <section class="catalog-section">
             <div class="catalog-header">
@@ -249,6 +223,6 @@
 
     </main>
 
-    <script src="/static/js/app.js?v=7.0"></script>
+    <script src="/static/js/app.js?v=8.0"></script>
 </body>
 </html>
