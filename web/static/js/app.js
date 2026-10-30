@@ -21,7 +21,7 @@ function initThemeSelector() {
     const select = document.getElementById("theme-select");
     if (!select) return;
 
-    const savedTheme = localStorage.getItem("bug_detector_theme") || "theme-light";
+    const savedTheme = localStorage.getItem("bug_detector_theme") || "theme-cyberpunk";
     applyTheme(savedTheme);
     select.value = savedTheme;
 
@@ -33,11 +33,11 @@ function initThemeSelector() {
 }
 
 function applyTheme(themeName) {
-    document.body.classList.remove("theme-slate", "theme-navy", "theme-light", "theme-black");
-    if (themeName && themeName !== "theme-light") {
-        document.body.classList.add(themeName);
-    } else {
+    document.body.classList.remove("theme-cyberpunk", "theme-light");
+    if (themeName && themeName === "theme-light") {
         document.body.classList.add("theme-light");
+    } else {
+        document.body.classList.add("theme-cyberpunk");
     }
 }
 
