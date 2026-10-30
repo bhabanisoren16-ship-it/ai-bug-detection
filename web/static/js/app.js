@@ -582,11 +582,11 @@ async function loadCatalogRules() {
 
             html += `
                 <tr>
-                    <td><code>${escapeHtml(ruleId)}</code></td>
-                    <td><span class="badge ${phaseClass}">${escapeHtml(phaseLabel)}</span></td>
-                    <td class="col-category">${escapeHtml(category)}</td>
-                    <td><div class="col-predicate">${escapeHtml(predicate)}</div></td>
-                    <td class="col-fix">${escapeHtml(fix)}</td>
+                    <td class="col-rule"><code class="rule-code">${escapeHtml(ruleId)}</code></td>
+                    <td class="col-phase"><span class="badge ${phaseClass}">${escapeHtml(phaseLabel)}</span></td>
+                    <td class="col-category"><strong class="category-title">${escapeHtml(category)}</strong></td>
+                    <td class="col-predicate"><div class="predicate-box">${escapeHtml(predicate)}</div></td>
+                    <td class="col-fix"><div class="fix-box">${escapeHtml(fix)}</div></td>
                     <td class="col-agans">
                         ${agansRule ? `<div class="agans-badge"><span>📖</span> ${escapeHtml(agansRule)}</div>` : ""}
                         ${agansSummary ? `<div class="agans-subtext">${escapeHtml(agansSummary)}</div>` : ""}
