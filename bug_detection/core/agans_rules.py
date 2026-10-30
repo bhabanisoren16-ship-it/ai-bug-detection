@@ -539,19 +539,28 @@ class AgansClosedLoopVerifier:
         patch_lines = patch_code_or_diff.splitlines()
 
         # Find target line from deletion markers in unified diff
-        del_lines = [l[1:].strip() for l in patch_lines if l.startswith("-") and not l.startswith("---")]
-        add_lines = [l[1:] for l in patch_lines if l.startswith("+") and not l.startswith("+++")]
+        raw_del = [l[1:] for l in patch_lines if l.startswith("-") and not l.startswith("---")]
+        raw_add = [l[1:] for l in patch_lines if l.startswith("+") and not l.startswith("+++")]
+        del_lines = [l.strip() for l in raw_del]
 
-        if del_lines and add_lines:
+        if del_lines and raw_add:
+            base_del_indent = len(raw_del[0]) - len(raw_del[0].lstrip()) if raw_del else 0
             new_lines = []
             replaced = False
             for line in lines:
-                if not replaced and any(d in line for d in del_lines):
-                    # Match the exact indentation of the original line being replaced
+                str_line = line.strip()
+                matched_del = next((d for d in del_lines if d == str_line or (len(d) > 6 and d in str_line)), None)
+                if not replaced and matched_del:
                     orig_indent = line[:len(line) - len(line.lstrip())]
-                    for add_l in add_lines:
-                        stripped_add = add_l.lstrip()
-                        new_lines.append(f"{orig_indent}{stripped_add}")
+                    if len(raw_add) == 1 and matched_del != str_line and matched_del in str_line:
+                        new_lines.append(line.replace(matched_del, raw_add[0].strip()))
+                    else:
+                        for add_l in raw_add:
+                            add_indent_len = len(add_l) - len(add_l.lstrip())
+                            rel_indent_len = max(0, add_indent_len - base_del_indent)
+                            rel_indent = " " * rel_indent_len
+                            clean_add = add_l.lstrip()
+                            new_lines.append(f"{orig_indent}{rel_indent}{clean_add}")
                     replaced = True
                 else:
                     new_lines.append(line)
@@ -620,6 +629,7 @@ class AgansClosedLoopVerifier:
             return {
                 "agans_rule": AgansRuleId.RULE_9_NOT_FIXED_AINT_FIXED.value,
                 "verified": True,
+                "is_fixed": True,
                 "status": "VERIFIED_CLEAN",
                 "message": (
                     f"Agans Rule 9 Verified: Defect {target_rule_id} completely eliminated! "
@@ -635,6 +645,7 @@ class AgansClosedLoopVerifier:
             return {
                 "agans_rule": AgansRuleId.RULE_9_NOT_FIXED_AINT_FIXED.value,
                 "verified": False,
+                "is_fixed": False,
                 "status": "DEFECT_PERSISTS",
                 "message": (
                     f"Agans Rule 9 Warning: Defect {target_rule_id} still triggers after patch! "
@@ -650,6 +661,7 @@ class AgansClosedLoopVerifier:
             return {
                 "agans_rule": AgansRuleId.RULE_9_NOT_FIXED_AINT_FIXED.value,
                 "verified": False,
+                "is_fixed": False,
                 "status": "SIDE_EFFECT_REGRESSION",
                 "message": (
                     f"Agans Rule 9 Warning: Targeted defect was removed but {len(new_issues)} "

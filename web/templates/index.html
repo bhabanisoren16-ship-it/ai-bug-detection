@@ -7,7 +7,7 @@
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
     <title>AI Bug Detection &amp; Highlighting System</title>
-    <link rel="stylesheet" href="/static/css/style.css?v=8.0">
+    <link rel="stylesheet" href="/static/css/style.css?v=9.0">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -84,7 +84,12 @@
                         <div class="panel-title">
                             <span>🎯</span> Detected Bugs &amp; Visual Highlights
                         </div>
-                        <span style="font-size: 11px; color: var(--text-dim); text-transform: uppercase; font-weight: 600;">LSP &amp; SARIF Overlays</span>
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <button id="btn-autofix-all" class="btn btn-primary btn-sm" style="background: #15803d; border-color: #166534; font-size: 11px; padding: 4px 10px;">
+                                <span>⚡</span> Auto-Fix All Bugs
+                            </button>
+                            <span style="font-size: 11px; color: var(--text-dim); text-transform: uppercase; font-weight: 600;">LSP &amp; SARIF Overlays</span>
+                        </div>
                     </div>
 
                     <!-- Summary Stats Bar -->
@@ -223,6 +228,6 @@
 
     </main>
 
-    <script src="/static/js/app.js?v=8.0"></script>
+    <script src="/static/js/app.js?v=9.0"></script>
 </body>
 </html>

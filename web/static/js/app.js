@@ -241,6 +241,9 @@ function initSampleButtons() {
 
     const btnExportSarif = document.getElementById("btn-export-sarif");
     if (btnExportSarif) btnExportSarif.addEventListener("click", exportSarif);
+
+    const btnAutofix = document.getElementById("btn-autofix-all");
+    if (btnAutofix) btnAutofix.addEventListener("click", runAutofixAll);
 }
 
 // ── API: Phase 1 Code Analysis ──────────────────────────────────────────────
@@ -663,18 +666,22 @@ async function verifyFix(btn) {
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
                 original_source: currentCode,
+                source_code: currentCode,
                 patch_diff: patchDiff,
-                target_rule_id: ruleId
+                unified_diff: patchDiff,
+                target_rule_id: ruleId,
+                rule_id: ruleId,
+                language: currentCode.includes("#include") ? "c" : "python"
             })
         });
 
         const data = await res.json();
-        if (data.is_fixed) {
+        if (data.is_fixed || data.verified) {
             if (statusBox) {
                 statusBox.innerHTML = `
-                    <div class="verify-status-banner pass" style="margin-top: 10px; padding: 10px 14px; background: #ecfccb; border: 1px solid #84cc16; border-radius: 6px; font-size: 12px; color: #1a2e05;">
-                        <strong>✅ Bug Fix Verified Successfully!</strong><br>
-                        Defect <code>${escapeHtml(ruleId)}</code> eliminated with clean test execution.
+                    <div class="verify-status-banner pass" style="margin-top: 10px; padding: 10px 14px; background: #ecfccb; border: 1.5px solid #84cc16; border-radius: 6px; font-size: 12px; color: #1a2e05; font-weight: 600;">
+                        <strong>✅ Bug Fix Verified Successfully under Agans Rule 9!</strong><br>
+                        Defect <code>${escapeHtml(ruleId)}</code> eliminated with clean test execution and 0 regressions.
                     </div>
                 `;
             }
@@ -694,7 +701,7 @@ async function verifyFix(btn) {
         } else {
             if (statusBox) {
                 statusBox.innerHTML = `
-                    <div class="verify-status-banner fail" style="margin-top: 10px; padding: 10px 14px; background: #fef2f2; border: 1px solid #fca5a5; border-radius: 6px; font-size: 12px; color: #991b1b;">
+                    <div class="verify-status-banner fail" style="margin-top: 10px; padding: 10px 14px; background: #fef2f2; border: 1.5px solid #fca5a5; border-radius: 6px; font-size: 12px; color: #991b1b;">
                         <strong>❌ Verification Failed:</strong> ${escapeHtml(data.message || "Bug persists in AST.")}
                     </div>
                 `;
@@ -706,6 +713,64 @@ async function verifyFix(btn) {
         alert("Verification failed: " + err.message);
         btn.disabled = false;
         btn.innerHTML = '<span>⚡</span> Apply Fix &amp; Verify';
+    }
+}
+
+// ── 1-Click Auto-Fix All Defects ───────────────────────────────────────────
+async function runAutofixAll() {
+    const btn = document.getElementById("btn-autofix-all");
+    const editor = document.getElementById("code-editor");
+    if (!editor || !btn) return;
+
+    const currentCode = editor.value;
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span> Remediating All...';
+
+    try {
+        const res = await fetch("/api/autofix-all", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                source_code: currentCode,
+                language: currentCode.includes("#include") ? "c" : "python"
+            })
+        });
+
+        const data = await res.json();
+        if (data.success && data.patched_source) {
+            editor.value = data.patched_source;
+            const gutter = document.getElementById("code-gutter");
+            if (gutter) {
+                const lines = data.patched_source.split("\n").length;
+                let numbers = "";
+                for (let i = 1; i <= lines; i++) numbers += i + "\n";
+                gutter.textContent = numbers;
+            }
+
+            // Immediately re-run detection on fixed code to update diagnostics
+            await runCodeAnalysis();
+
+            // Display celebration banner
+            const resultsContainer = document.getElementById("code-results");
+            if (resultsContainer) {
+                resultsContainer.insertAdjacentHTML("afterbegin", `
+                    <div style="padding: 14px 18px; background: #f0fdf4; border: 2px solid #22c55e; border-radius: 8px; font-size: 13px; color: #14532d; font-weight: 700; margin-bottom: 12px; display: flex; align-items: center; gap: 10px;">
+                        <span style="font-size: 20px;">🎉</span>
+                        <div>
+                            <div>All Defects Remediated &amp; Verified Clean!</div>
+                            <div style="font-size: 11px; font-weight: 500; color: #166534;">${escapeHtml(data.message)}</div>
+                        </div>
+                    </div>
+                `);
+            }
+        } else {
+            alert("Remediation result: " + (data.message || data.error));
+        }
+    } catch (err) {
+        alert("Auto-remediation failed: " + err.message);
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<span>⚡</span> Auto-Fix All Bugs';
     }
 }
 
