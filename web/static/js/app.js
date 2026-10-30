@@ -19,25 +19,26 @@ document.addEventListener("DOMContentLoaded", () => {
 // ── Theme Selector ──────────────────────────────────────────────────────────
 function initThemeSelector() {
     const select = document.getElementById("theme-select");
-    if (!select) return;
-
-    const savedTheme = localStorage.getItem("bug_detector_theme") || "theme-cyberpunk";
-    applyTheme(savedTheme);
-    select.value = savedTheme;
-
-    select.addEventListener("change", (e) => {
-        const theme = e.target.value;
-        applyTheme(theme);
-        localStorage.setItem("bug_detector_theme", theme);
-    });
+    
+    // Set clean white theme active
+    localStorage.setItem("bug_detector_theme", "theme-light");
+    applyTheme("theme-light");
+    if (select) {
+        select.value = "theme-light";
+        select.addEventListener("change", (e) => {
+            const theme = e.target.value;
+            applyTheme(theme);
+            localStorage.setItem("bug_detector_theme", theme);
+        });
+    }
 }
 
 function applyTheme(themeName) {
     document.body.classList.remove("theme-cyberpunk", "theme-light");
-    if (themeName && themeName === "theme-light") {
-        document.body.classList.add("theme-light");
-    } else {
+    if (themeName && themeName === "theme-cyberpunk") {
         document.body.classList.add("theme-cyberpunk");
+    } else {
+        document.body.classList.add("theme-light");
     }
 }
 
