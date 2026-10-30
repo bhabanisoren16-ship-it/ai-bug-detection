@@ -7,7 +7,7 @@
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
     <title>AI & Software Bug Detection & Highlighting System</title>
-    <link rel="stylesheet" href="/static/css/style.css?v=2.3">
+    <link rel="stylesheet" href="/static/css/style.css?v=2.4">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -68,9 +68,9 @@
                         <textarea id="code-editor" class="code-textarea" spellcheck="false" placeholder="Paste C, Python, or Rust code here..."></textarea>
                     </div>
 
-                    <div style="padding: 14px 20px; background: #f8fafc; border-top: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center;">
-                        <span style="font-size: 12px; color: var(--text-dim);">Supported: AST Parsing, Taint Tracking, Div-by-Zero, Memory Lifecycle, Off-by-One</span>
-                        <div style="display: flex; gap: 8px;">
+                    <div class="panel-footer">
+                        <span class="panel-footer-hint">Supported: AST Parsing, Taint Tracking, Div-by-Zero, Memory Lifecycle, Off-by-One</span>
+                        <div class="panel-footer-actions">
                             <button id="btn-check-plug-code" class="btn btn-secondary" title="Agans Rule 7: Fast-fail pre-flight sanity check">
                                 <span>🔌</span> Check the Plug (Rule 7)
                             </button>
@@ -143,9 +143,9 @@
                         <textarea id="netlist-editor" class="code-textarea" spellcheck="false" placeholder="Paste elaborated netlist JSON here..."></textarea>
                     </div>
 
-                    <div style="padding: 14px 20px; background: #f8fafc; border-top: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center;">
-                        <span style="font-size: 12px; color: var(--text-dim);">Checks: Static Timing (STA), Clock Domain Crossing (CDC), ERC, Floating Nets</span>
-                        <div style="display: flex; gap: 8px;">
+                    <div class="panel-footer">
+                        <span class="panel-footer-hint">Checks: Static Timing (STA), Clock Domain Crossing (CDC), ERC, Floating Nets</span>
+                        <div class="panel-footer-actions">
                             <button id="btn-check-plug-circuit" class="btn btn-secondary" title="Agans Rule 7: Fast-fail pre-flight sanity check on circuit netlist">
                                 <span>🔌</span> Check the Plug (Rule 7)
                             </button>
@@ -230,7 +230,7 @@
 
     </main>
 
-    <script src="/static/js/app.js?v=2.3"></script>
+    <script src="/static/js/app.js?v=2.4"></script>
 </body>
 </html>
 

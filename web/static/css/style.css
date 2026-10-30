@@ -366,6 +366,28 @@ body {
   color: #0f172a;
 }
 
+/* ── Panel Footer Action Bar ─────────────────────────────────────────────── */
+.panel-footer {
+  padding: 14px 20px;
+  background: #f8fafc;
+  border-top: 1px solid var(--border-color);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.panel-footer-hint {
+  font-size: 12px;
+  color: var(--text-dim);
+}
+
+.panel-footer-actions {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
 /* ── Action Buttons ──────────────────────────────────────────────────────── */
 .btn {
   display: inline-flex;
@@ -662,6 +684,34 @@ body {
   font-weight: 600;
 }
 
+/* ── 4-View Synchronized Cross-Probe Card ────────────────────────────────── */
+.probe-card {
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  padding: 12px;
+  margin: 10px 0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+}
+
+.probe-header {
+  font-size: 11px;
+  font-weight: 700;
+  color: #1558C9;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.probe-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+  font-size: 11px;
+}
+
 /* ── Rule Catalog Table ──────────────────────────────────────────────────── */
 .catalog-section {
   margin-top: 24px;
@@ -670,6 +720,12 @@ body {
   border-radius: 12px;
   overflow: hidden;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
+}
+
+#catalog-body {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  width: 100%;
 }
 
 .catalog-header {
@@ -920,5 +976,396 @@ body {
   background: #fef2f2;
   border: 1px solid #fca5a5;
   color: #991b1b;
+}
+
+/* ==========================================================================
+   Mobile-Only Responsive Design System (@media max-width: 768px & 480px)
+   Targeted exclusively for mobile viewports while preserving desktop layout.
+   ========================================================================== */
+
+@media (max-width: 768px) {
+  /* ── Viewport & Overflow Containment ── */
+  html, body {
+    overflow-x: hidden;
+    max-width: 100vw;
+    width: 100%;
+    position: relative;
+  }
+
+  /* ── Mobile Application Header ── */
+  .app-header {
+    padding: 10px 14px;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .brand {
+    gap: 10px;
+    width: 100%;
+    align-items: center;
+  }
+
+  .brand-icon {
+    width: 36px;
+    height: 36px;
+    font-size: 17px;
+    border-radius: 8px;
+    flex-shrink: 0;
+  }
+
+  .brand-title {
+    font-size: 15px;
+    line-height: 1.25;
+    white-space: normal;
+  }
+
+  .brand-subtitle {
+    font-size: 11px;
+    line-height: 1.3;
+    color: var(--text-dim);
+  }
+
+  .header-badges {
+    width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    justify-content: flex-start;
+    align-items: center;
+  }
+
+  .pill-badge {
+    font-size: 10px;
+    padding: 4px 8px;
+  }
+
+  #btn-export-sarif {
+    font-size: 11px;
+    padding: 5px 10px;
+    margin-left: auto;
+  }
+
+  /* ── Mobile Navigation Tabs ── */
+  .nav-tabs {
+    padding: 0 10px;
+    gap: 4px;
+    display: flex;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    white-space: nowrap;
+    scrollbar-width: none;
+  }
+
+  .nav-tabs::-webkit-scrollbar {
+    display: none;
+  }
+
+  .tab-btn {
+    padding: 11px 10px;
+    font-size: 13px;
+    flex: 1;
+    justify-content: center;
+    text-align: center;
+    white-space: nowrap;
+    min-height: 42px;
+  }
+
+  .tab-btn .tab-icon {
+    font-size: 15px;
+  }
+
+  /* ── Mobile Main Layout ── */
+  .main-content {
+    padding: 12px 10px 30px;
+    max-width: 100%;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .split-view {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  .panel-card {
+    border-radius: 10px;
+    box-shadow: 0 1px 6px rgba(0, 0, 0, 0.04);
+  }
+
+  /* ── Panel Header & Sample Buttons ── */
+  .panel-header {
+    padding: 10px 12px;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: space-between;
+  }
+
+  .panel-title {
+    font-size: 13px;
+  }
+
+  .panel-actions {
+    width: 100%;
+    display: flex;
+    gap: 6px;
+  }
+
+  .panel-actions .btn {
+    flex: 1;
+    font-size: 11px;
+    padding: 7px 10px;
+    justify-content: center;
+    text-align: center;
+    min-height: 36px;
+  }
+
+  /* ── Code Editor on Mobile ── */
+  .editor-wrapper {
+    min-height: 220px;
+    max-height: 320px;
+    height: 280px;
+  }
+
+  .line-numbers {
+    width: 36px;
+    padding: 10px 4px;
+    font-size: 11px;
+    line-height: 19px;
+  }
+
+  .code-textarea {
+    font-size: 12px;
+    line-height: 19px;
+    padding: 10px 10px;
+  }
+
+  /* ── Action Footer Bar ── */
+  .panel-footer {
+    flex-direction: column;
+    align-items: stretch;
+    padding: 12px 10px;
+    gap: 10px;
+  }
+
+  .panel-footer-hint {
+    font-size: 11px;
+    text-align: center;
+    line-height: 1.4;
+  }
+
+  .panel-footer-actions {
+    flex-direction: column;
+    width: 100%;
+    gap: 8px;
+  }
+
+  .panel-footer-actions .btn {
+    width: 100%;
+    justify-content: center;
+    padding: 11px 14px;
+    font-size: 13px;
+    min-height: 44px;
+  }
+
+  /* ── Stats Bar (2x2 Grid on Mobile) ── */
+  .stats-bar {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+    padding: 10px 12px;
+  }
+
+  .stat-label {
+    font-size: 10px;
+    letter-spacing: 0.3px;
+  }
+
+  .stat-value {
+    font-size: 17px;
+  }
+
+  /* ── Results Scroll & Diagnostic Cards ── */
+  .results-scroll {
+    padding: 10px 8px;
+    max-height: 480px;
+    gap: 10px;
+  }
+
+  .diag-card {
+    padding: 12px 10px;
+    border-radius: 8px;
+  }
+
+  .diag-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+  }
+
+  .diag-score {
+    font-size: 11px;
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+
+  .diag-message {
+    font-size: 13px;
+    line-height: 1.4;
+    word-break: break-word;
+  }
+
+  .diag-location {
+    font-size: 11px;
+    word-break: break-all;
+  }
+
+  .causal-trail {
+    padding: 6px 8px;
+    gap: 4px;
+    flex-wrap: wrap;
+  }
+
+  .causal-step {
+    font-size: 10px;
+    padding: 2px 6px;
+  }
+
+  .code-overlay-block {
+    font-size: 11px;
+    padding: 8px 10px;
+    max-width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .diff-box {
+    font-size: 11px;
+    max-width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .diff-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+    padding: 8px 10px;
+  }
+
+  .diff-header > div {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .btn-verify-rule9 {
+    width: 100%;
+    justify-content: center;
+    padding: 9px 12px;
+    font-size: 11px;
+    min-height: 38px;
+  }
+
+  .probe-card {
+    padding: 10px 8px;
+  }
+
+  .probe-grid {
+    grid-template-columns: 1fr;
+    gap: 6px;
+  }
+
+  .verify-status-banner {
+    font-size: 11px;
+    padding: 8px 10px;
+  }
+
+  /* ── Rule Catalog Table on Mobile ── */
+  .catalog-section {
+    margin-top: 16px;
+    border-radius: 10px;
+  }
+
+  .catalog-header {
+    padding: 12px 14px;
+    gap: 8px;
+  }
+
+  .catalog-header > div {
+    font-size: 12px;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  #catalog-body {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    width: 100%;
+  }
+
+  .catalog-table {
+    min-width: 650px;
+    font-size: 12px;
+  }
+
+  .catalog-table th,
+  .catalog-table td {
+    padding: 8px 10px;
+  }
+
+  .empty-state {
+    padding: 30px 14px;
+  }
+
+  .empty-icon {
+    font-size: 32px;
+  }
+
+  .empty-state p {
+    font-size: 12px;
+  }
+}
+
+/* ── Small Smartphones (max-width: 480px) ── */
+@media (max-width: 480px) {
+  .brand-title {
+    font-size: 14px;
+  }
+
+  .brand-subtitle {
+    font-size: 10px;
+  }
+
+  .tab-btn {
+    font-size: 11px;
+    padding: 10px 4px;
+    gap: 4px;
+  }
+
+  .tab-btn .tab-icon {
+    font-size: 13px;
+  }
+
+  .pill-badge {
+    font-size: 9px;
+    padding: 3px 6px;
+  }
+
+  .panel-title {
+    font-size: 12px;
+  }
+
+  .empty-state {
+    padding: 24px 8px;
+  }
+
+  .empty-icon {
+    font-size: 28px;
+  }
 }
 

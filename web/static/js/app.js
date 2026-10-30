@@ -485,12 +485,12 @@ function renderCircuitResults(data) {
         const bboxStr = probe.gdsii_bbox ? probe.gdsii_bbox.join(", ") : "M3: (142.4, 88.0, 219.6, 104.2) µm";
 
         html += `
-            <div style="background: #ffffff; border: 1px solid #cbd5e1; border-radius: 8px; padding: 12px; margin: 10px 0; box-shadow: 0 2px 8px rgba(0,0,0,0.03);">
-                <div style="font-size: 11px; font-weight: 700; color: #1558C9; text-transform: uppercase; margin-bottom: 8px; display: flex; justify-content: space-between;">
+            <div class="probe-card">
+                <div class="probe-header">
                     <span>Synchronized 4-View Cross-Probe</span>
                     <span style="color: #64748b; font-family: monospace;">TELEMETRY ACTIVE</span>
                 </div>
-                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; font-size: 11px;">
+                <div class="probe-grid">
                     <div style="background: #f8fafc; padding: 8px 10px; border-radius: 5px; border-left: 3px solid #1558C9; border: 1px solid #e2e8f0; border-left-width: 3px;">
                         <strong style="color: #1558C9;">View 1: RTL Source</strong>
                         <div style="font-family: monospace; color: #0f172a; margin-top: 2px;">${probe.module || 'core_alu'}.sv:84</div>
