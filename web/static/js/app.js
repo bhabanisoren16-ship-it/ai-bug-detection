@@ -10,6 +10,7 @@ document.addEventListener("DOMContentLoaded", () => {
     initSampleButtons();
     initCatalogToggle();
     loadCatalogRules();
+    loadAgansRules();
 
     // Default sample load: Python defect sample
     loadSampleCode("python");
@@ -574,6 +575,8 @@ async function loadCatalogRules() {
             const category = r.category || r.bug_category || "";
             const predicate = r.detection_predicate || r.formal_detection_predicate || "";
             const fix = r.fix_strategy || r.automated_fix_strategy || "";
+            const agansRule = r.agans_rule || "";
+            const agansSummary = r.agans_summary || "";
             const phaseLabel = phase === "PHASE_1_CODE" ? "Phase 1: Code" : "Phase 2: Circuit";
             const phaseClass = phase === "PHASE_1_CODE" ? "info" : "purple";
 
@@ -581,15 +584,63 @@ async function loadCatalogRules() {
                 <tr>
                     <td><code>${escapeHtml(ruleId)}</code></td>
                     <td><span class="badge ${phaseClass}">${escapeHtml(phaseLabel)}</span></td>
-                    <td style="color: #00f0ff; font-weight: 700;">${escapeHtml(category)}</td>
-                    <td style="font-family: var(--font-mono); font-size: 12px; color: #cbd5e1;">${escapeHtml(predicate)}</td>
-                    <td style="font-size: 12px; color: #D4FF24;">${escapeHtml(fix)}</td>
+                    <td class="col-category">${escapeHtml(category)}</td>
+                    <td><div class="col-predicate">${escapeHtml(predicate)}</div></td>
+                    <td class="col-fix">${escapeHtml(fix)}</td>
+                    <td class="col-agans">
+                        ${agansRule ? `<div class="agans-badge"><span>📖</span> ${escapeHtml(agansRule)}</div>` : ""}
+                        ${agansSummary ? `<div class="agans-subtext">${escapeHtml(agansSummary)}</div>` : ""}
+                    </td>
                 </tr>
             `;
         });
         tbody.innerHTML = html;
     } catch (err) {
         console.error("Failed to load catalog rules:", err);
+    }
+}
+
+// ── David J. Agans' 9 Rules Grid ─────────────────────────────────────────────
+async function loadAgansRules() {
+    const grid = document.getElementById("agans-rules-grid");
+    if (!grid) return;
+
+    try {
+        const res = await fetch("/api/agans-rules");
+        const data = await res.json();
+        const rules = data.rules || [];
+
+        let html = "";
+        rules.forEach(r => {
+            html += `
+                <div class="agans-card">
+                    <div class="agans-card-header">
+                        <span class="agans-rule-number">RULE ${r.rule_number}</span>
+                        <span style="font-size: 11px; color: var(--color-cobalt); font-weight: 700; font-family: var(--font-mono);">${escapeHtml(r.telemetry_hook)}</span>
+                    </div>
+                    <div class="agans-card-title">${escapeHtml(r.title)}</div>
+                    <div class="agans-mantra">"${escapeHtml(r.mantra)}"</div>
+                    <p style="font-size: 12px; color: var(--text-muted); line-height: 1.5;">${escapeHtml(r.summary)}</p>
+                    
+                    <div class="agans-section-block">
+                        <div class="agans-section-label code-label">
+                            <span>💻</span> Software Code Implementation:
+                        </div>
+                        <div class="agans-section-text">${escapeHtml(r.software_application)}</div>
+                    </div>
+
+                    <div class="agans-section-block">
+                        <div class="agans-section-label circuit-label">
+                            <span>🔌</span> Hardware Circuit Implementation:
+                        </div>
+                        <div class="agans-section-text">${escapeHtml(r.circuit_application)}</div>
+                    </div>
+                </div>
+            `;
+        });
+        grid.innerHTML = html;
+    } catch (err) {
+        console.error("Failed to load Agans rules:", err);
     }
 }
 

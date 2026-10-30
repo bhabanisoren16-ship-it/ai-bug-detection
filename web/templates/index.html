@@ -41,13 +41,16 @@
         </div>
     </header>
 
-    <!-- Navigation Tabs (Core Problem Statement: Software Code & Hardware Circuit) -->
+    <!-- Navigation Tabs (Core Problem Statement: Software Code & Hardware Circuit + Agans' 9 Rules) -->
     <nav class="nav-tabs">
         <button class="tab-btn active" data-tab="tab-phase1">
             <span class="tab-icon">💻</span> Phase 1: Software Code Debugging
         </button>
         <button class="tab-btn" data-tab="tab-phase2">
             <span class="tab-icon">🔌</span> Phase 2: Hardware Netlist Debugging
+        </button>
+        <button class="tab-btn" data-tab="tab-agans">
+            <span class="tab-icon">📖</span> Agans' 9 Indispensable Rules
         </button>
     </nav>
 
@@ -199,6 +202,29 @@
         </section>
 
 
+        <!-- ================= AGANS' 9 RULES PANEL ================= -->
+        <section id="tab-agans" class="tab-panel">
+            <div class="agans-hero-card">
+                <div>
+                    <div class="agans-hero-title">📖 David J. Agans' 9 Indispensable Rules for Debugging</div>
+                    <div class="agans-hero-subtitle">
+                        From the engineering classic <em>"Debugging: The 9 Indispensable Rules for Finding Even the Most Elusive Software and Hardware Problems"</em> by David J. Agans.<br>
+                        Our dual-phase engine connects each diagnostic rule to formal software AST guards and hardware circuit telemetry contracts.
+                    </div>
+                </div>
+                <div style="display: flex; gap: 8px; flex-shrink: 0; align-items: center; flex-wrap: wrap;">
+                    <span class="pill-badge" style="background: var(--color-info-bg); color: var(--color-info-text); border-color: var(--color-info-border);">Dual-Phase Mapping</span>
+                    <span class="pill-badge neon-badge">9 Maxims Active</span>
+                </div>
+            </div>
+
+            <!-- 9 Rules Interactive Grid (Populated via /api/agans-rules) -->
+            <div id="agans-rules-grid" class="agans-grid">
+                <!-- Dynamically loaded by app.js -->
+            </div>
+        </section>
+
+
         <!-- ================= RULE CATALOG SECTION ================= -->
         <section class="catalog-section">
             <div class="catalog-header">
@@ -218,6 +244,7 @@
                             <th>Bug Category</th>
                             <th>Formal Detection Predicate</th>
                             <th>Automated Fix Strategy</th>
+                            <th>David J. Agans Reference</th>
                         </tr>
                     </thead>
                     <tbody id="catalog-tbody">
