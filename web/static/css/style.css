@@ -62,6 +62,140 @@
   --transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+/* ── Theme Option Overrides ──────────────────────────────────────────────── */
+body.theme-light {
+  --bg-void: #f8fafc;
+  --bg-primary: #f8fafc;
+  --bg-card: #ffffff;
+  --bg-card-hover: #f1f5f9;
+  --bg-input: #ffffff;
+  --bg-gutter: #f1f5f9;
+  --border-color: #e2e8f0;
+  --border-accent: #1558C9;
+  --border-neon: #84cc16;
+  --border-highlight: #cbd5e1;
+  --text-main: #0f172a;
+  --text-muted: #334155;
+  --text-dim: #475569;
+  --color-critical-bg: #fef2f2;
+  --color-critical-text: #991b1b;
+  --color-critical-border: #fca5a5;
+  --color-warning-bg: #fffbeb;
+  --color-warning-text: #92400e;
+  --color-warning-border: #fcd34d;
+  --color-violet-bg: #f5f3ff;
+  --color-violet-text: #5b21b6;
+  --color-violet-border: #c4b5fd;
+  --color-info-bg: #eff6ff;
+  --color-info-text: #1e40af;
+  --color-info-border: #bfdbfe;
+}
+
+body.theme-slate {
+  --bg-void: #0f172a;
+  --bg-primary: #0f172a;
+  --bg-card: #1e293b;
+  --bg-card-hover: #263349;
+  --bg-input: #0b1120;
+  --bg-gutter: #070c18;
+  --border-color: #334155;
+  --border-highlight: #475569;
+  --text-main: #f8fafc;
+  --text-muted: #94a3b8;
+  --text-dim: #64748b;
+  --color-critical-bg: rgba(220, 38, 38, 0.15);
+  --color-critical-text: #fca5a5;
+  --color-warning-bg: rgba(217, 119, 6, 0.15);
+  --color-warning-text: #fcd34d;
+  --color-violet-bg: rgba(124, 58, 237, 0.15);
+  --color-violet-text: #c4b5fd;
+  --color-info-bg: rgba(21, 88, 201, 0.15);
+  --color-info-text: #93c5fd;
+}
+
+body.theme-navy {
+  --bg-void: #070c1a;
+  --bg-primary: #0a1128;
+  --bg-card: #101c3d;
+  --bg-card-hover: #162654;
+  --bg-input: #050a17;
+  --bg-gutter: #040712;
+  --border-color: #1b2d5a;
+  --border-highlight: #253d7a;
+  --text-main: #f1f5f9;
+  --text-muted: #8ea3cc;
+  --text-dim: #5c74a3;
+  --color-critical-bg: rgba(220, 38, 38, 0.15);
+  --color-critical-text: #fca5a5;
+  --color-warning-bg: rgba(217, 119, 6, 0.15);
+  --color-warning-text: #fcd34d;
+  --color-violet-bg: rgba(124, 58, 237, 0.15);
+  --color-violet-text: #c4b5fd;
+  --color-info-bg: rgba(21, 88, 201, 0.15);
+  --color-info-text: #93c5fd;
+}
+
+body.theme-black {
+  --bg-void: #030407;
+  --bg-primary: #030407;
+  --bg-card: #080b13;
+  --bg-card-hover: #0d1220;
+  --bg-input: #05070c;
+  --bg-gutter: #020305;
+  --border-color: #121929;
+  --border-highlight: #1d2942;
+  --text-main: #f3f4f6;
+  --text-muted: #9ca3af;
+  --text-dim: #5c6479;
+  --color-critical-bg: rgba(220, 38, 38, 0.18);
+  --color-critical-text: #fca5a5;
+  --color-warning-bg: rgba(217, 119, 6, 0.18);
+  --color-warning-text: #fcd34d;
+  --color-violet-bg: rgba(124, 58, 237, 0.18);
+  --color-violet-text: #c4b5fd;
+  --color-info-bg: rgba(21, 88, 201, 0.18);
+  --color-info-text: #93c5fd;
+}
+
+/* ── Theme Switcher Pill Component ────────────────────────────────────────── */
+.theme-switch-wrapper {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 20px;
+  padding: 4px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-main);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  transition: var(--transition);
+}
+
+.theme-switch-wrapper:hover {
+  border-color: var(--color-cobalt);
+  box-shadow: 0 2px 6px rgba(21, 88, 201, 0.12);
+}
+
+.theme-select {
+  background: transparent;
+  border: none;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-main);
+  cursor: pointer;
+  outline: none;
+  font-family: inherit;
+  padding: 1px 2px;
+}
+
+.theme-select option {
+  background: var(--bg-card);
+  color: var(--text-main);
+  font-weight: 600;
+}
+
 
 
 * {
@@ -297,7 +431,7 @@ body {
 
 .panel-header {
   padding: 14px 20px;
-  background: #f8fafc;
+  background: var(--bg-gutter);
   border-bottom: 1px solid var(--border-color);
   display: flex;
   justify-content: space-between;
@@ -819,7 +953,7 @@ body {
 }
 
 .agans-hero-card {
-  background: #ffffff;
+  background: var(--bg-card);
   border: 1px solid var(--border-color);
   border-radius: 12px;
   padding: 24px 28px;
@@ -852,7 +986,7 @@ body {
 }
 
 .agans-card {
-  background: #ffffff;
+  background: var(--bg-card);
   border: 1px solid var(--border-color);
   border-radius: 12px;
   padding: 20px;
@@ -1030,7 +1164,7 @@ body {
 }
 
 .pragmatic-hero-card {
-  background: #ffffff;
+  background: var(--bg-card);
   border: 1px solid var(--border-color);
   border-radius: 12px;
   padding: 24px 28px;
@@ -1122,7 +1256,7 @@ body {
 }
 
 .bw-item {
-  background: #ffffff;
+  background: var(--bg-card);
   border: 1px solid var(--border-color);
   border-radius: 8px;
   padding: 12px 14px;
@@ -1138,7 +1272,7 @@ body {
 }
 
 .dbc-card {
-  background: #ffffff;
+  background: var(--bg-card);
   border: 1px solid var(--border-color);
   border-radius: 8px;
   padding: 12px 14px;
@@ -1228,7 +1362,7 @@ body {
 }
 
 .pragmatic-pillar-card {
-  background: #ffffff;
+  background: var(--bg-card);
   border: 1px solid var(--border-color);
   border-radius: 12px;
   padding: 20px;
@@ -1377,6 +1511,15 @@ body {
   .pill-badge {
     font-size: 10px;
     padding: 4px 8px;
+  }
+
+  .theme-switch-wrapper {
+    padding: 3px 8px;
+    font-size: 11px;
+  }
+
+  .theme-select {
+    font-size: 11px;
   }
 
   #btn-export-sarif {

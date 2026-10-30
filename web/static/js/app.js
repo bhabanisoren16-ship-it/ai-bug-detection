@@ -10,22 +10,45 @@
  */
 
 document.addEventListener("DOMContentLoaded", () => {
-    // Ensure clean white theme is always active
-    document.body.classList.remove("theme-slate", "theme-navy", "theme-black");
-    localStorage.removeItem("bug_detector_theme");
-
+    initThemeSelector();
     initTabs();
     initLineNumbers();
     initSampleButtons();
     initCatalogToggle();
     loadCatalogRules();
     initCheckPlugButtons();
+    initAgansProtocol();
     loadPragmaticPrinciples();
 
     // Default sample load: Pragmatic Contract & Clean Coding Sample
     loadSampleCode("pragmatic");
     loadSampleNetlist();
 });
+
+// ── Theme Selector ──────────────────────────────────────────────────────────
+function initThemeSelector() {
+    const select = document.getElementById("theme-select");
+    if (!select) return;
+
+    const savedTheme = localStorage.getItem("bug_detector_theme") || "theme-light";
+    applyTheme(savedTheme);
+    select.value = savedTheme;
+
+    select.addEventListener("change", (e) => {
+        const theme = e.target.value;
+        applyTheme(theme);
+        localStorage.setItem("bug_detector_theme", theme);
+    });
+}
+
+function applyTheme(themeName) {
+    document.body.classList.remove("theme-slate", "theme-navy", "theme-light", "theme-black");
+    if (themeName && themeName !== "theme-light") {
+        document.body.classList.add(themeName);
+    } else {
+        document.body.classList.add("theme-light");
+    }
+}
 
 // ── Tab Management ──────────────────────────────────────────────────────────
 function initTabs() {
@@ -1056,6 +1079,67 @@ function initCheckPlugButtons() {
                 btnCirc.innerHTML = '<span>🔌</span> Check the Plug';
             }
         });
+    }
+}
+
+// ── David J. Agans' 9 Indispensable Rules Protocol Implementation ───────────
+function initAgansProtocol() {
+    const btn = document.getElementById("btn-header-agans");
+    if (btn) {
+        btn.addEventListener("click", () => {
+            const agansTab = document.querySelector('.tab-btn[data-tab="tab-agans"]');
+            if (agansTab) {
+                agansTab.click();
+                const agansSection = document.getElementById("tab-agans");
+                if (agansSection) {
+                    agansSection.scrollIntoView({ behavior: "smooth" });
+                }
+            }
+        });
+    }
+    loadAgansRules();
+}
+
+async function loadAgansRules() {
+    const grid = document.getElementById("agans-rules-grid");
+    if (!grid) return;
+
+    try {
+        const res = await fetch("/api/agans-rules");
+        const data = await res.json();
+        const rules = data.rules || [];
+
+        let html = "";
+        rules.forEach(r => {
+            html += `
+                <div class="agans-card">
+                    <div class="agans-card-header">
+                        <span class="agans-rule-number">RULE ${r.rule_number}</span>
+                        <span style="font-size: 11px; color: var(--color-cobalt); font-weight: 700; font-family: monospace;">${escapeHtml(r.telemetry_hook)}</span>
+                    </div>
+                    <div class="agans-card-title">${escapeHtml(r.title)}</div>
+                    <div class="agans-mantra">"${escapeHtml(r.mantra)}"</div>
+                    <p style="font-size: 12px; color: var(--text-muted); line-height: 1.5;">${escapeHtml(r.summary)}</p>
+                    
+                    <div class="agans-section-block">
+                        <div class="agans-section-label code-label">
+                            <span>💻</span> Software Code Implementation:
+                        </div>
+                        <div class="agans-section-text">${escapeHtml(r.software_application)}</div>
+                    </div>
+
+                    <div class="agans-section-block">
+                        <div class="agans-section-label circuit-label">
+                            <span>🔌</span> Hardware Circuit Implementation:
+                        </div>
+                        <div class="agans-section-text">${escapeHtml(r.circuit_application)}</div>
+                    </div>
+                </div>
+            `;
+        });
+        grid.innerHTML = html;
+    } catch (err) {
+        console.error("Failed to load Agans rules:", err);
     }
 }
 

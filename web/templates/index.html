@@ -7,7 +7,7 @@
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
     <title>Pragmatic Bug Detection &amp; Engineering Workbench</title>
-    <link rel="stylesheet" href="/static/css/style.css?v=3.0">
+    <link rel="stylesheet" href="/static/css/style.css?v=3.1">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -24,9 +24,21 @@
             </div>
         </div>
         <div class="header-badges">
+            <div class="theme-switch-wrapper" title="Switch Theme Background">
+                <span style="font-size: 13px;">🎨</span>
+                <select id="theme-select" class="theme-select" aria-label="Select Theme">
+                    <option value="theme-light" selected>☀️ Clean Light</option>
+                    <option value="theme-slate">🌑 Deep Slate</option>
+                    <option value="theme-navy">🌌 Cyber Navy</option>
+                    <option value="theme-black">🖤 Pitch Black</option>
+                </select>
+            </div>
             <div id="badge-broken-windows" class="pill-badge badge-broken-windows" title="Pragmatic Programmer Tip 3: Don't Live with Broken Windows">
                 <span>🪟</span> Broken Windows: <strong id="header-bw-count" style="margin-left: 4px;">0</strong> (<span id="header-bw-grade">A+</span>)
             </div>
+            <button id="btn-header-agans" class="btn btn-secondary btn-sm" title="View David J. Agans' 9 Indispensable Rules">
+                <span>📖</span> Agans' 9 Rules
+            </button>
             <span class="pill-badge" title="Pragmatic Programmer Tip 37: Design with Contracts">
                 <span>📐</span> DbC Active
             </span>
@@ -49,6 +61,9 @@
         </button>
         <button class="tab-btn" data-tab="tab-pragmatic">
             <span class="tab-icon">📐</span> Pragmatic Principles &amp; Contracts
+        </button>
+        <button class="tab-btn" data-tab="tab-agans">
+            <span class="tab-icon">📖</span> Agans' 9 Indispensable Rules
         </button>
     </nav>
 
@@ -345,6 +360,28 @@
 
         </section>
 
+        <!-- ================= AGANS' 9 RULES PANEL ================= -->
+        <section id="tab-agans" class="tab-panel">
+            <div class="agans-hero-card">
+                <div>
+                    <div class="agans-hero-title">📖 David J. Agans' 9 Indispensable Rules for Debugging</div>
+                    <div class="agans-hero-subtitle">
+                        From the seminal engineering classic <em>"Debugging: The 9 Indispensable Rules for Finding Even the Most Elusive Software and Hardware Problems"</em> by David J. Agans.<br>
+                        Our dual-phase AI engine integrates each rule as a formal, executable debugging principle across both software code and hardware circuit domains.
+                    </div>
+                </div>
+                <div style="display: flex; gap: 8px; flex-shrink: 0; align-items: center;">
+                    <span class="pill-badge" style="background: var(--color-info-bg); color: var(--color-info-text); border-color: var(--color-info-border);">Software &amp; Hardware Dual-Phase</span>
+                    <span class="pill-badge neon-badge">9 Maxims Active</span>
+                </div>
+            </div>
+
+            <!-- 9 Rules Interactive Grid (Populated via /api/agans-rules) -->
+            <div id="agans-rules-grid" class="agans-grid">
+                <!-- Dynamically loaded by app.js -->
+            </div>
+        </section>
+
 
         <!-- ================= RULE CATALOG SECTION ================= -->
         <section class="catalog-section">
@@ -377,6 +414,6 @@
 
     </main>
 
-    <script src="/static/js/app.js?v=3.0"></script>
+    <script src="/static/js/app.js?v=3.1"></script>
 </body>
 </html>

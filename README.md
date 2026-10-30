@@ -3,7 +3,10 @@
 [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/bhabanisoren16-ship-it/ai-bug-detection)
 
 > **Dual-Phase Automated Defect Localization, Multi-Layer Visual Highlighting & Hardware-Software Co-Verification Engine**  
-> Built strictly in accordance with `ai_software_bug_detection_phase_by_phase.pdf` and David J. Agans' *"Debugging: The 9 Indispensable Rules"*.
+> Built strictly in accordance with `ai_software_bug_detection_phase_by_phase.pdf`, David J. Agans' *"Debugging: The 9 Indispensable Rules"*, and Andrew Hunt & David Thomas' *"The Pragmatic Programmer"*.
+
+🌐 **Live Production**: [https://ai-bugdetection.vercel.app](https://ai-bugdetection.vercel.app)  
+📦 **GitHub Repository**: [https://github.com/bhabanisoren16-ship-it/ai-bug-detection](https://github.com/bhabanisoren16-ship-it/ai-bug-detection)
 
 ---
 
