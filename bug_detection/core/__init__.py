@@ -42,3 +42,15 @@ from bug_detection.core.agans_rules import (
     AgansPreFlightChecker,
     AgansClosedLoopVerifier,
 )
+from bug_detection.core.pragmatic_programmer import (
+    PragmaticPillar,
+    PragmaticTip,
+    PRAGMATIC_TIPS,
+    BrokenWindowItem,
+    BrokenWindowsReport,
+    ContractViolation,
+    TracerBulletResult,
+    TracerBulletStage,
+    PragmaticAnalyzer,
+    get_all_pragmatic_tips,
+)

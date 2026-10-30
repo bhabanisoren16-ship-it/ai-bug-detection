@@ -6,8 +6,8 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
-    <title>AI & Software Bug Detection & Highlighting System</title>
-    <link rel="stylesheet" href="/static/css/style.css?v=2.4">
+    <title>Pragmatic Bug Detection &amp; Engineering Workbench</title>
+    <link rel="stylesheet" href="/static/css/style.css?v=3.0">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -19,12 +19,17 @@
         <div class="brand">
             <div class="brand-icon">⚡</div>
             <div>
-                <div class="brand-title">AI Bug Detection & Highlighting System</div>
-                <div class="brand-subtitle">Dual-Phase Automated Defect Localization & Multi-Layer Visual Highlighting</div>
+                <div class="brand-title">Pragmatic Bug Detection &amp; Engineering Workbench</div>
+                <div class="brand-subtitle">Clean Coding • Design by Contract • Ruthless Testing • Ubiquitous Automation</div>
             </div>
         </div>
         <div class="header-badges">
-            <span class="pill-badge">SARIF v2.1.0 Ready</span>
+            <div id="badge-broken-windows" class="pill-badge badge-broken-windows" title="Pragmatic Programmer Tip 3: Don't Live with Broken Windows">
+                <span>🪟</span> Broken Windows: <strong id="header-bw-count" style="margin-left: 4px;">0</strong> (<span id="header-bw-grade">A+</span>)
+            </div>
+            <span class="pill-badge" title="Pragmatic Programmer Tip 37: Design with Contracts">
+                <span>📐</span> DbC Active
+            </span>
             <span class="pill-badge neon-badge">
                 <span class="pulse-dot"></span> Engine Online
             </span>
@@ -37,10 +42,13 @@
     <!-- Navigation Tabs -->
     <nav class="nav-tabs">
         <button class="tab-btn active" data-tab="tab-phase1">
-            <span class="tab-icon">💻</span> Phase 1: Code Debugging
+            <span class="tab-icon">💻</span> Phase 1: Code Workbench
         </button>
         <button class="tab-btn" data-tab="tab-phase2">
-            <span class="tab-icon">🔌</span> Phase 2: Circuit & Netlist Debugging
+            <span class="tab-icon">🔌</span> Phase 2: Hardware &amp; Netlist
+        </button>
+        <button class="tab-btn" data-tab="tab-pragmatic">
+            <span class="tab-icon">📐</span> Pragmatic Principles &amp; Contracts
         </button>
     </nav>
 
@@ -55,11 +63,12 @@
                 <div class="panel-card">
                     <div class="panel-header">
                         <div class="panel-title">
-                            <span>📝</span> Source Code Editor
+                            <span>📝</span> Source Code &amp; Contract Editor
                         </div>
                         <div class="panel-actions">
                             <button id="btn-sample-py" class="btn btn-secondary btn-sm">Load Python Sample</button>
                             <button id="btn-sample-c" class="btn btn-secondary btn-sm">Load C Sample</button>
+                            <button id="btn-sample-pragmatic" class="btn btn-secondary btn-sm" title="Pragmatic Tip 37: Design with Contracts">Load Contract Sample</button>
                         </div>
                     </div>
                     
@@ -69,13 +78,16 @@
                     </div>
 
                     <div class="panel-footer">
-                        <span class="panel-footer-hint">Supported: AST Parsing, Taint Tracking, Div-by-Zero, Memory Lifecycle, Off-by-One</span>
+                        <span class="panel-footer-hint">Pragmatic Suite: AST Lexing • Design by Contract (DbC) • Taint Tracking • Ochiai SBFL • Auto-Diff Refactoring</span>
                         <div class="panel-footer-actions">
-                            <button id="btn-check-plug-code" class="btn btn-secondary" title="Agans Rule 7: Fast-fail pre-flight sanity check">
-                                <span>🔌</span> Check the Plug (Rule 7)
+                            <button id="btn-tracer-bullet" class="btn btn-secondary" title="Pragmatic Tip 12: Use Tracer Bullets to Find the Target">
+                                <span>🎯</span> Fire Tracer Bullet
                             </button>
-                            <button id="btn-analyze-code" class="btn btn-primary">
-                                <span>⚡</span> Run Full Phase 1 Analysis
+                            <button id="btn-check-plug-code" class="btn btn-secondary" title="Fast-fail pre-flight sanity check">
+                                <span>🔌</span> Check the Plug
+                            </button>
+                            <button id="btn-analyze-code" class="btn btn-primary" title="Pragmatic Tip 49 &amp; 62: Ubiquitous Automation &amp; Ruthless Testing">
+                                <span>⚡</span> Run Pragmatic Full Analysis
                             </button>
                         </div>
                     </div>
@@ -85,28 +97,32 @@
                 <div class="panel-card">
                     <div class="panel-header">
                         <div class="panel-title">
-                            <span>🎯</span> Visual Diagnostics & Telemetry
+                            <span>🎯</span> Visual Diagnostics &amp; Telemetry
                         </div>
-                        <span style="font-size: 11px; color: var(--text-dim); text-transform: uppercase; font-weight: 600;">LSP & SARIF Overlay</span>
+                        <span style="font-size: 11px; color: var(--text-dim); text-transform: uppercase; font-weight: 600;">LSP, SARIF &amp; ETC Refactoring Overlay</span>
                     </div>
 
                     <!-- Summary Stats Bar -->
-                    <div class="stats-bar">
+                    <div class="stats-bar stats-bar-5">
                         <div class="stat-item">
                             <span class="stat-label">Total Defects</span>
                             <span id="stat-code-total" class="stat-value">0</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Broken Windows</span>
+                            <span id="stat-code-bw" class="stat-value" style="color: var(--color-warning);">0 (A+)</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">DbC Violations</span>
+                            <span id="stat-code-dbc" class="stat-value" style="color: var(--color-violet);">0</span>
                         </div>
                         <div class="stat-item">
                             <span class="stat-label">Critical / Errors</span>
                             <span id="stat-code-crit" class="stat-value" style="color: var(--color-critical);">0</span>
                         </div>
                         <div class="stat-item">
-                            <span class="stat-label">Warnings</span>
-                            <span id="stat-code-warn" class="stat-value" style="color: var(--color-warning);">0</span>
-                        </div>
-                        <div class="stat-item">
-                            <span class="stat-label">Run Status</span>
-                            <span id="stat-code-status" class="stat-value" style="font-size: 14px; color: var(--color-success);">CLEAN</span>
+                            <span class="stat-label">Code Health</span>
+                            <span id="stat-code-status" class="stat-value" style="font-size: 14px; color: var(--color-success);">PRISTINE</span>
                         </div>
                     </div>
 
@@ -114,7 +130,7 @@
                     <div id="code-results" class="results-scroll">
                         <div class="empty-state">
                             <div class="empty-icon">🔍</div>
-                            <p><strong>Ready for Inspection</strong><br>Click "Run Full Phase 1 Analysis" to detect memory bugs, tainted sinks, division by zero, and logic flaws.</p>
+                            <p><strong>Ready for Pragmatic Inspection</strong><br>Click "Run Pragmatic Full Analysis" to detect memory bugs, tainted sinks, division by zero, and contract breaches.</p>
                         </div>
                     </div>
                 </div>
@@ -146,8 +162,8 @@
                     <div class="panel-footer">
                         <span class="panel-footer-hint">Checks: Static Timing (STA), Clock Domain Crossing (CDC), ERC, Floating Nets</span>
                         <div class="panel-footer-actions">
-                            <button id="btn-check-plug-circuit" class="btn btn-secondary" title="Agans Rule 7: Fast-fail pre-flight sanity check on circuit netlist">
-                                <span>🔌</span> Check the Plug (Rule 7)
+                            <button id="btn-check-plug-circuit" class="btn btn-secondary" title="Fast-fail pre-flight sanity check on circuit netlist">
+                                <span>🔌</span> Check the Plug
                             </button>
                             <button id="btn-analyze-circuit" class="btn btn-primary">
                                 <span>⚡</span> Run Full Phase 2 Analysis
@@ -198,6 +214,137 @@
         </section>
 
 
+        <!-- ================= PRAGMATIC PRINCIPLES & CONTRACTS ================= -->
+        <section id="tab-pragmatic" class="tab-panel">
+            
+            <!-- Hero Card -->
+            <div class="pragmatic-hero-card">
+                <div>
+                    <div class="pragmatic-hero-title">📖 The Pragmatic Programmer: Engineering &amp; Automation Workbench</div>
+                    <div class="pragmatic-hero-subtitle">
+                        Direct implementation of seminal engineering disciplines from <em>The Pragmatic Programmer: From Journeyman to Master (20th Anniversary Edition)</em> by David Thomas &amp; Andrew Hunt.<br>
+                        Formalized across 6 core pillars: <strong>Problem Solving</strong>, <strong>Clean Coding</strong>, <strong>Software Design</strong>, <strong>Testing</strong>, <strong>Code Maintenance</strong>, and <strong>Ubiquitous Automation</strong>.
+                    </div>
+                </div>
+                <div class="pragmatic-hero-badges">
+                    <span class="pill-badge" style="background: #eff6ff; color: #1558C9; border-color: #93c5fd;">6 Pillars Active</span>
+                    <span class="pill-badge neon-badge">Design by Contract Enforced</span>
+                </div>
+            </div>
+
+            <!-- Two-Column Pragmatic Grid: Broken Windows + Contracts -->
+            <div class="pragmatic-subgrid">
+                
+                <!-- Broken Windows Scorecard -->
+                <div class="panel-card">
+                    <div class="panel-header">
+                        <div class="panel-title">
+                            <span>🪟</span> Broken Windows &amp; Software Entropy Scorecard
+                        </div>
+                        <span id="bw-status-pill" class="pill-badge" style="background: #ecfccb; color: #365314; border-color: #84cc16;">Clean Code: A+</span>
+                    </div>
+                    <div class="pragmatic-card-body">
+                        <div class="entropy-meter-container">
+                            <div class="entropy-score-block">
+                                <span class="entropy-score-num" id="bw-score-num">0</span>
+                                <span class="entropy-score-label">/ 100 Technical Debt Score</span>
+                            </div>
+                            <div class="entropy-advice-text" id="bw-advice-text">
+                                Tip 3: "Don't live with broken windows. Fix bad designs, wrong decisions, and poor code when you see them."
+                            </div>
+                        </div>
+                        <div id="bw-items-container" class="bw-items-scroll">
+                            <div class="empty-state" style="padding: 24px 10px;">
+                                <div class="empty-icon">🧼</div>
+                                <p><strong>Zero Broken Windows Detected!</strong><br>Codebase adheres to Clean Coding and Orthogonality standards.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Design by Contract (DbC) Verification Matrix -->
+                <div class="panel-card">
+                    <div class="panel-header">
+                        <div class="panel-title">
+                            <span>📐</span> Design by Contract (DbC) Verification Matrix
+                        </div>
+                        <span class="pill-badge" style="background: #eff6ff; color: #1558C9; border-color: #93c5fd;">Pre / Post / Invariants</span>
+                    </div>
+                    <div class="pragmatic-card-body">
+                        <p style="font-size: 12px; color: var(--text-dim); margin-bottom: 12px;">
+                            Tip 37: <em>"Design with Contracts: Use contracts to document and verify that code does no more and no less than it claims to do."</em>
+                        </p>
+                        <div id="dbc-matrix-container" class="dbc-items-scroll">
+                            <div class="empty-state" style="padding: 24px 10px;">
+                                <div class="empty-icon">📐</div>
+                                <p><strong>Contracts Fully Satisfied</strong><br>Preconditions, postconditions, and class invariants are upheld.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Tracer Bullet Telemetry Console -->
+            <div class="panel-card" style="margin-top: 20px;">
+                <div class="panel-header">
+                    <div class="panel-title">
+                        <span>🎯</span> Tracer Bullet End-to-End Architectural Telemetry
+                    </div>
+                    <span style="font-size: 11px; color: var(--text-dim); font-family: monospace;">TIP 12: USE TRACER BULLETS TO FIND THE TARGET</span>
+                </div>
+                <div class="pragmatic-card-body" id="tracer-console-container">
+                    <div style="font-size: 13px; color: var(--text-muted); margin-bottom: 12px;">
+                        Click <strong>"Fire Tracer Bullet"</strong> in the Code Workbench to shoot an immediate end-to-end slice across AST parsing, Design by Contract guards, dataflow traversal, and target verification.
+                    </div>
+                    <div id="tracer-stages-grid" class="tracer-stages-grid">
+                        <div class="tracer-stage-item">
+                            <div class="tracer-stage-header">
+                                <span class="tracer-dot"></span>
+                                <strong>Stage 1: AST Parsing</strong>
+                            </div>
+                            <span class="tracer-status">STANDBY</span>
+                        </div>
+                        <div class="tracer-stage-item">
+                            <div class="tracer-stage-header">
+                                <span class="tracer-dot"></span>
+                                <strong>Stage 2: Contract Probe</strong>
+                            </div>
+                            <span class="tracer-status">STANDBY</span>
+                        </div>
+                        <div class="tracer-stage-item">
+                            <div class="tracer-stage-header">
+                                <span class="tracer-dot"></span>
+                                <strong>Stage 3: Dataflow Traversal</strong>
+                            </div>
+                            <span class="tracer-status">STANDBY</span>
+                        </div>
+                        <div class="tracer-stage-item">
+                            <div class="tracer-stage-header">
+                                <span class="tracer-dot"></span>
+                                <strong>Stage 4: Target Verification</strong>
+                            </div>
+                            <span class="tracer-status">STANDBY</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- The 6 Pillars of Pragmatic Craftsmanship Grid -->
+            <div style="margin-top: 28px; margin-bottom: 12px;">
+                <div style="font-size: 17px; font-weight: 800; color: var(--text-main);">
+                    🏛️ The 6 Core Pillars of Pragmatic Engineering
+                </div>
+                <div style="font-size: 12px; color: var(--text-dim); margin-top: 2px;">
+                    Practical rules and canonical tips from David Thomas &amp; Andrew Hunt powering this detection system.
+                </div>
+            </div>
+            <div id="pragmatic-pillars-grid" class="pragmatic-grid">
+                <!-- Populated by app.js via /api/pragmatic-principles -->
+            </div>
+
+        </section>
+
 
         <!-- ================= RULE CATALOG SECTION ================= -->
         <section class="catalog-section">
@@ -218,7 +365,7 @@
                             <th>Bug Category</th>
                             <th>Formal Detection Predicate</th>
                             <th>Automated Fix Strategy</th>
-                            <th>Agans Rule Reference</th>
+                            <th>Pragmatic / Agans Reference</th>
                         </tr>
                     </thead>
                     <tbody id="catalog-tbody">
@@ -230,7 +377,6 @@
 
     </main>
 
-    <script src="/static/js/app.js?v=2.4"></script>
+    <script src="/static/js/app.js?v=3.0"></script>
 </body>
 </html>
-

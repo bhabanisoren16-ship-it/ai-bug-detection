@@ -41,6 +41,14 @@ from bug_detection.core.agans_rules import (
     AgansClosedLoopVerifier,
     get_agans_mapping_for_rule,
 )
+from bug_detection.core.pragmatic_programmer import (
+    PragmaticPillar,
+    PragmaticAnalyzer,
+    get_all_pragmatic_tips,
+    BrokenWindowsReport,
+    ContractViolation,
+    TracerBulletResult,
+)
 from bug_detection.core.schemas import (
     AutoRemediation,
     BugDiagnostic,
@@ -905,7 +913,35 @@ def analyze_code():
         for d in diagnostics:
             report.add_diagnostic(d)
 
-        return jsonify(report.to_dict()), 200
+        rep_dict = report.to_dict()
+
+        # Pragmatic Programmer Analytics
+        bw_report = PragmaticAnalyzer.compute_broken_windows(diagnostics, source_code)
+        contracts = PragmaticAnalyzer.inspect_contracts(source_code, diagnostics)
+        refactoring = PragmaticAnalyzer.get_refactoring_advice(diagnostics)
+        tracer = PragmaticAnalyzer.run_tracer_bullet(source_code)
+
+        rep_dict["pragmatic_analysis"] = {
+            "broken_windows": {
+                "total_score": bw_report.total_score,
+                "entropy_level": bw_report.entropy_level,
+                "clean_code_rating": bw_report.clean_code_rating,
+                "windows_count": bw_report.windows_count,
+                "advice": bw_report.advice,
+                "windows": [w.__dict__ for w in bw_report.windows],
+            },
+            "contract_violations": [c.__dict__ for c in contracts],
+            "refactoring_advice": refactoring,
+            "tracer_bullet": {
+                "success": tracer.success,
+                "total_duration_ms": tracer.total_duration_ms,
+                "target_hit": tracer.target_hit,
+                "summary": tracer.summary,
+                "stages": [s.__dict__ for s in tracer.stages],
+            },
+        }
+
+        return jsonify(rep_dict), 200
 
     except Exception as exc:
         traceback.print_exc()
@@ -940,7 +976,35 @@ def analyze_circuit():
         for d in diagnostics:
             report.add_diagnostic(d)
 
-        return jsonify(report.to_dict()), 200
+        rep_dict = report.to_dict()
+
+        # Pragmatic Programmer Circuit Contracts
+        bw_report = PragmaticAnalyzer.compute_broken_windows(diagnostics)
+        contracts = PragmaticAnalyzer.inspect_contracts("", diagnostics)
+        refactoring = PragmaticAnalyzer.get_refactoring_advice(diagnostics)
+        tracer = PragmaticAnalyzer.run_tracer_bullet("def circuit_top(): pass", netlist=netlist)
+
+        rep_dict["pragmatic_analysis"] = {
+            "broken_windows": {
+                "total_score": bw_report.total_score,
+                "entropy_level": bw_report.entropy_level,
+                "clean_code_rating": bw_report.clean_code_rating,
+                "windows_count": bw_report.windows_count,
+                "advice": bw_report.advice,
+                "windows": [w.__dict__ for w in bw_report.windows],
+            },
+            "contract_violations": [c.__dict__ for c in contracts],
+            "refactoring_advice": refactoring,
+            "tracer_bullet": {
+                "success": tracer.success,
+                "total_duration_ms": tracer.total_duration_ms,
+                "target_hit": tracer.target_hit,
+                "summary": tracer.summary,
+                "stages": [s.__dict__ for s in tracer.stages],
+            },
+        }
+
+        return jsonify(rep_dict), 200
 
     except json.JSONDecodeError as exc:
         return jsonify({"error": f"Invalid JSON: {exc}"}), 400
@@ -1029,6 +1093,38 @@ def _detect_language(filename: str, content: str) -> str:
     if "function " in content or "const " in content or "=>" in content:
         return "javascript"
     return "python"
+
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+#  Routes: Pragmatic Programmer Principles & Tracer Bullet
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+@app.route("/api/pragmatic-principles", methods=["GET"])
+def get_pragmatic_principles():
+    """Return canonical Pragmatic Programmer tips covering the 6 core pillars."""
+    return jsonify({
+        "book": "The Pragmatic Programmer: From Journeyman to Master (20th Anniversary Edition)",
+        "authors": "David Thomas, Andrew Hunt",
+        "pillars": [p.value for p in PragmaticPillar],
+        "tips": get_all_pragmatic_tips(),
+    }), 200
+
+
+@app.route("/api/tracer-bullet", methods=["POST"])
+def run_tracer_bullet_endpoint():
+    """Fast-fail end-to-end tracer bullet across parser, contract, and flow."""
+    data = request.get_json(force=True, silent=True) or {}
+    source_code = data.get("source_code", "")
+    netlist = data.get("netlist")
+
+    result = PragmaticAnalyzer.run_tracer_bullet(source_code, netlist=netlist)
+    return jsonify({
+        "success": result.success,
+        "total_duration_ms": result.total_duration_ms,
+        "target_hit": result.target_hit,
+        "summary": result.summary,
+        "stages": [s.__dict__ for s in result.stages],
+    }), 200
 
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
