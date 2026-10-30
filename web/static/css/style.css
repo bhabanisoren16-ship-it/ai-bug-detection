@@ -813,26 +813,40 @@ body {
 }
 
 .catalog-table th {
-  background: #050814;
+  background: var(--bg-primary);
   color: #00f0ff;
-  border-bottom: 1px solid rgba(0, 240, 255, 0.25);
-  padding: 10px 14px;
+  border-bottom: 2px solid rgba(0, 240, 255, 0.3);
+  padding: 12px 14px;
   text-align: left;
   font-family: var(--font-mono);
   font-size: 11px;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.6px;
 }
 
 .catalog-table td {
-  padding: 10px 14px;
-  border-bottom: 1px solid rgba(0, 240, 255, 0.08);
+  padding: 12px 14px;
+  border-bottom: 1px solid rgba(0, 240, 255, 0.12);
   font-size: 12px;
-  color: #e2e8f0;
+  color: var(--text-main);
+  vertical-align: top;
+  line-height: 1.5;
 }
 
 .catalog-table tr:hover td {
-  background: rgba(0, 240, 255, 0.04);
+  background: rgba(0, 240, 255, 0.05);
+}
+
+.catalog-table td code {
+  color: #00f0ff;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  background: rgba(0, 240, 255, 0.1);
+  padding: 2px 6px;
+  border-radius: 4px;
+  border: 1px solid rgba(0, 240, 255, 0.25);
+  display: inline-block;
 }
 
 .catalog-section.collapsed #catalog-body {

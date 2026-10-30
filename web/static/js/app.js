@@ -568,13 +568,21 @@ async function loadCatalogRules() {
 
         let html = "";
         rules.forEach(r => {
+            const ruleId = r.rule_id || "";
+            const phase = r.phase || "";
+            const category = r.category || r.bug_category || "";
+            const predicate = r.detection_predicate || r.formal_detection_predicate || "";
+            const fix = r.fix_strategy || r.automated_fix_strategy || "";
+            const phaseLabel = phase === "PHASE_1_CODE" ? "Phase 1: Code" : "Phase 2: Circuit";
+            const phaseClass = phase === "PHASE_1_CODE" ? "info" : "purple";
+
             html += `
                 <tr>
-                    <td><code>${escapeHtml(r.rule_id)}</code></td>
-                    <td><span class="badge ${r.phase === 'PHASE_1_CODE' ? 'info' : 'purple'}">${escapeHtml(r.phase)}</span></td>
-                    <td><strong>${escapeHtml(r.bug_category)}</strong></td>
-                    <td style="font-family: monospace; font-size: 12px; color: #334155;">${escapeHtml(r.formal_detection_predicate)}</td>
-                    <td style="font-size: 12px; color: #15803d;">${escapeHtml(r.automated_fix_strategy)}</td>
+                    <td><code>${escapeHtml(ruleId)}</code></td>
+                    <td><span class="badge ${phaseClass}">${escapeHtml(phaseLabel)}</span></td>
+                    <td style="color: #00f0ff; font-weight: 700;">${escapeHtml(category)}</td>
+                    <td style="font-family: var(--font-mono); font-size: 12px; color: #cbd5e1;">${escapeHtml(predicate)}</td>
+                    <td style="font-size: 12px; color: #D4FF24;">${escapeHtml(fix)}</td>
                 </tr>
             `;
         });
