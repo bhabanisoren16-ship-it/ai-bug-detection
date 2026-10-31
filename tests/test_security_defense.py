@@ -170,6 +170,47 @@ class TestSecurityAndDefenseCapabilities(unittest.TestCase):
         res = self.client.post("/api/analyze/code", data=oversized_data, content_type="application/json")
         self.assertEqual(res.status_code, 413)
 
+    def test_google_defense_headers(self):
+        """Verify web server enforces Google production defense headers (gws, HSTS, COOP, CORP, strict CSP)."""
+        res = self.client.get("/")
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(res.headers.get("Server"), "gws")
+        self.assertIn("max-age=31536000", res.headers.get("Strict-Transport-Security", ""))
+        self.assertEqual(res.headers.get("Cross-Origin-Opener-Policy"), "same-origin")
+        self.assertEqual(res.headers.get("Cross-Origin-Resource-Policy"), "same-origin")
+        csp = res.headers.get("Content-Security-Policy", "")
+        self.assertIn("object-src 'none'", csp)
+        self.assertIn("base-uri 'self'", csp)
+
+    def test_google_defense_unsupported_media_type(self):
+        """Verify Google Defense rejects non-JSON payloads on JSON endpoints with HTTP 415."""
+        res = self.client.post(
+            "/api/analyze/code",
+            data="<xml>bad_payload</xml>",
+            content_type="application/xml"
+        )
+        self.assertEqual(res.status_code, 415)
+
+    def test_google_defense_null_byte_protection(self):
+        """Verify Google Defense blocks null byte URL/query string injection with HTTP 400."""
+        res = self.client.get("/?param=\x00bad")
+        self.assertEqual(res.status_code, 400)
+
+    def test_google_defense_sanitizer_catalog(self):
+        """Verify all 15 production rules have Google Sanitizer & Defense standards assigned."""
+        for rule_id, rule in ALL_RULES.items():
+            self.assertTrue(hasattr(rule, "google_defense_standard"))
+            self.assertGreater(len(rule.google_defense_standard), 0)
+            self.assertIn("Google", rule.google_defense_standard)
+
+    def test_google_defense_posture_profile(self):
+        """Verify PragmaticAnalyzer includes Google BeyondCorp profile."""
+        audit = PragmaticAnalyzer.audit_security_defense("a = 1", [])
+        self.assertIn("google_defense_profile", audit)
+        profile = audit["google_defense_profile"]
+        self.assertIn("Google BeyondCorp", profile["architecture"])
+        self.assertEqual(profile["zero_trust_status"], "VERIFIED_SECURE")
+
 
 if __name__ == "__main__":
     unittest.main()

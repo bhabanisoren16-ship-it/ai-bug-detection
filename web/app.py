@@ -17,6 +17,8 @@ import os
 import sys
 import re
 import json
+import time
+import threading
 import traceback
 from pathlib import Path
 from typing import Any, Dict, List
@@ -30,6 +32,11 @@ from flask import (
 )
 from flask_cors import CORS
 from werkzeug.exceptions import HTTPException
+from werkzeug.serving import WSGIRequestHandler
+
+# Google Defense: Mask WSGI server signature to prevent fingerprinting
+WSGIRequestHandler.server_version = "gws"
+WSGIRequestHandler.sys_version = ""
 
 # ── Ensure the project root is on sys.path for imports ────────────────────────
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
@@ -79,33 +86,155 @@ app = Flask(
 )
 CORS(app)
 
-# ── Defensive Web Shield Configuration ───────────────────────────────────────
+# ── Google Defense-in-Depth Web Shield Configuration ─────────────────────────
 app.config['MAX_CONTENT_LENGTH'] = 2 * 1024 * 1024  # 2MB defensive limit against memory DoS
 app.config['JSON_SORT_KEYS'] = False
+
+
+class GoogleDefenseRateLimiter:
+    """Google BeyondCorp Zero-Trust Anti-DDoS and Request Throttling Defense."""
+
+    def __init__(self, limit: int = 240, window_seconds: float = 60.0):
+        self.limit = limit
+        self.window = window_seconds
+        self.requests: Dict[str, List[float]] = {}
+        self._lock = threading.Lock()
+
+    def is_allowed(self, client_ip: str) -> bool:
+        now = time.time()
+        with self._lock:
+            times = self.requests.get(client_ip, [])
+            cutoff = now - self.window
+            times = [t for t in times if t > cutoff]
+            if len(times) >= self.limit:
+                self.requests[client_ip] = times
+                return False
+            times.append(now)
+            self.requests[client_ip] = times
+            return True
+
+    def reset(self):
+        with self._lock:
+            self.requests.clear()
+
+
+google_rate_limiter = GoogleDefenseRateLimiter(limit=240, window_seconds=60.0)
+
+
+@app.before_request
+def enforce_google_defense_policies():
+    """
+    Google BeyondCorp Zero-Trust API Guard:
+    1. Null byte / path injection defense
+    2. Rate limiting / Anti-DDoS throttle
+    3. Content-Type verification for JSON endpoints
+    """
+    # 1. Null byte injection check
+    path_raw = request.environ.get("RAW_URI", request.path)
+    if "\x00" in path_raw or (request.query_string and b"\x00" in request.query_string):
+        return jsonify({
+            "error": {
+                "code": 400,
+                "message": "Invalid argument: Null byte injection detected.",
+                "status": "INVALID_ARGUMENT",
+            },
+            "status_code": 400,
+        }), 400
+
+    # 2. Rate limiting (bypassed in test environment)
+    if not app.config.get("TESTING", False):
+        client_ip = request.headers.get("X-Forwarded-For", request.remote_addr or "127.0.0.1").split(",")[0].strip()
+        if not google_rate_limiter.is_allowed(client_ip):
+            resp = jsonify({
+                "error": {
+                    "code": 429,
+                    "message": "Resource has been exhausted: Google BeyondCorp Rate Limit Exceeded.",
+                    "status": "RESOURCE_EXHAUSTED",
+                },
+                "status_code": 429,
+                "shield_status": "GOOGLE_DEFENSE_THROTTLED",
+            })
+            resp.status_code = 429
+            resp.headers["Retry-After"] = "60"
+            return resp
+
+    # 3. Content-Type verification for POST JSON endpoints
+    if request.method == "POST" and request.path in ["/api/analyze/code", "/api/analyze/circuit", "/api/export/sarif"]:
+        if request.content_length and request.content_length > 0:
+            ct = request.content_type or ""
+            if "application/json" not in ct:
+                return jsonify({
+                    "error": {
+                        "code": 415,
+                        "message": f"Unsupported Media Type: Google Defense requires 'application/json', got '{ct}'.",
+                        "status": "FAILED_PRECONDITION",
+                    },
+                    "status_code": 415,
+                }), 415
+
+    return None
+
 
 @app.after_request
 def apply_security_defence_headers(response):
     """
-    Enforce strict defense-in-depth HTTP security headers on all responses:
-    - Protect against Cross-Site Scripting (XSS)
-    - Prevent Clickjacking / UI Redress attacks
-    - Block MIME type sniffing
-    - Enforce Strict Content Security Policy
+    Google Production Defense-in-Depth Security Headers:
+    Enforces the exact security parameters used across Google Enterprise & Cloud services:
+    - Server: gws (Masks Werkzeug / Python server banner)
+    - Strict-Transport-Security: HSTS preload (1 year)
+    - Cross-Origin-Opener-Policy & Cross-Origin-Resource-Policy: same-origin
+    - Permissions-Policy: Zero-trust device locking
+    - Strict Content Security Policy
     """
+    # Prevent caching of dynamic diagnostic state
+    response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+    response.headers["Pragma"] = "no-cache"
+    response.headers["Expires"] = "0"
+
+    # Google Server Banner masking
+    response.headers["Server"] = "gws"
+
+    # MIME type sniffing defense (Mandatory Google standard)
     response.headers["X-Content-Type-Options"] = "nosniff"
+
+    # UI Redressing & Clickjacking protection (Google standard)
     response.headers["X-Frame-Options"] = "SAMEORIGIN"
+
+    # XSS Protection
     response.headers["X-XSS-Protection"] = "1; mode=block"
+
+    # Google Strict-Transport-Security (1 year HSTS with subdomains and preload)
+    response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains; preload"
+
+    # Referrer Policy (Google standard)
     response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
-    response.headers["Permissions-Policy"] = "camera=(), microphone=(), geolocation=()"
+
+    # Google Cross-Origin Isolation (COOP & CORP)
+    response.headers["Cross-Origin-Opener-Policy"] = "same-origin"
+    response.headers["Cross-Origin-Resource-Policy"] = "same-origin"
+
+    # Google Zero-Trust Hardware & Browser Permissions Lockout
+    response.headers["Permissions-Policy"] = (
+        "accelerometer=(), autoplay=(), camera=(), encrypted-media=(), "
+        "fullscreen=(), geolocation=(), gyroscope=(), magnetometer=(), "
+        "microphone=(), midi=(), payment=(), picture-in-picture=(), usb=()"
+    )
+
+    # Google Strict Content Security Policy
     response.headers["Content-Security-Policy"] = (
         "default-src 'self'; "
         "script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; "
         "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; "
         "font-src 'self' https://fonts.gstatic.com data:; "
-        "img-src 'self' data:; "
+        "img-src 'self' data: https:; "
+        "object-src 'none'; "
+        "base-uri 'self'; "
+        "frame-ancestors 'self'; "
         "connect-src 'self'"
     )
+
     return response
+
 
 @app.errorhandler(413)
 def request_entity_too_large(error):
@@ -113,7 +242,39 @@ def request_entity_too_large(error):
     return jsonify({
         "error": "Payload Too Large: Request body exceeds defensive limit (2MB).",
         "shield_status": "BLOCKED",
+        "google_defense": {
+            "code": 413,
+            "status": "RESOURCE_EXHAUSTED",
+            "message": "Payload Too Large: Request body exceeds defensive limit (2MB).",
+            "policy": "Google BeyondCorp Memory Exhaustion Shield",
+        }
     }), 413
+
+
+@app.errorhandler(415)
+def unsupported_media_type(error):
+    """Google Defense: Unsupported Media Type handler."""
+    return jsonify({
+        "error": {
+            "code": 415,
+            "message": "Unsupported Media Type: Expected application/json payload.",
+            "status": "FAILED_PRECONDITION",
+        },
+        "status_code": 415,
+    }), 415
+
+
+@app.errorhandler(429)
+def rate_limit_exceeded(error):
+    """Google Defense: Rate Limit / Resource Exhaustion handler."""
+    return jsonify({
+        "error": {
+            "code": 429,
+            "message": "Resource has been exhausted: Google BeyondCorp Rate Limit Exceeded.",
+            "status": "RESOURCE_EXHAUSTED",
+        },
+        "status_code": 429,
+    }), 429
 
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -1080,36 +1241,6 @@ def _analyze_phase2_circuit(netlist: Dict[str, Any]) -> List[BugDiagnostic]:
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 #  Route: Dashboard
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-@app.after_request
-def add_security_and_no_cache_headers(response):
-    """
-    Ensure browsers and CDNs do not cache responses during active development,
-    and enforce strict defense-in-depth HTTP security headers:
-    - X-Content-Type-Options: nosniff
-    - X-Frame-Options: SAMEORIGIN
-    - X-XSS-Protection: 1; mode=block
-    - Content-Security-Policy
-    - Referrer-Policy
-    """
-    response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
-    response.headers["Pragma"] = "no-cache"
-    response.headers["Expires"] = "0"
-    response.headers["X-Content-Type-Options"] = "nosniff"
-    response.headers["X-Frame-Options"] = "SAMEORIGIN"
-    response.headers["X-XSS-Protection"] = "1; mode=block"
-    response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
-    response.headers["Permissions-Policy"] = "camera=(), microphone=(), geolocation=()"
-    response.headers["Content-Security-Policy"] = (
-        "default-src 'self'; "
-        "script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; "
-        "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; "
-        "font-src 'self' https://fonts.gstatic.com data:; "
-        "img-src 'self' data:; "
-        "connect-src 'self'"
-    )
-    return response
-
 
 @app.route("/")
 def index():

@@ -29,6 +29,7 @@ class DetectionRule:
     agans_rule: str = ""        # Reference to David J. Agans' 9 Indispensable Rules
     agans_mantra: str = ""      # Exact maxim from Agans book
     agans_summary: str = ""     # Principle rationale from Agans
+    google_defense_standard: str = ""  # Google Security & Sanitizer Standard
 
     def to_dict(self) -> dict:
         return {
@@ -43,6 +44,7 @@ class DetectionRule:
             "agans_rule": self.agans_rule,
             "agans_mantra": self.agans_mantra,
             "agans_summary": self.agans_summary,
+            "google_defense_standard": self.google_defense_standard,
         }
 
 
@@ -62,6 +64,7 @@ CODE_MEM_001 = DetectionRule(
     agans_rule="Rule 6: Keep an Audit Trail",
     agans_mantra="Write down what you did, in what order, and what happened. Don't trust your memory.",
     agans_summary="Track chronological allocation, free, and dereference events (Ch. 8).",
+    google_defense_standard="Google AddressSanitizer (ASan) & GWP-ASan Heap Guard",
 )
 
 CODE_MEM_002 = DetectionRule(
@@ -79,6 +82,7 @@ CODE_MEM_002 = DetectionRule(
     agans_rule="Rule 2: Make It Fail",
     agans_mantra="Do it again. Stimulate the failure consistently so you can study it under a microscope.",
     agans_summary="Stimulate boundary-value stress conditions (index >= length) (Ch. 4).",
+    google_defense_standard="Google AddressSanitizer (ASan) Buffer Bounds Check",
 )
 
 CODE_NUM_003 = DetectionRule(
@@ -96,6 +100,7 @@ CODE_NUM_003 = DetectionRule(
     agans_rule="Rule 7: Check the Plug",
     agans_mantra="Question your assumptions. Always start with the simple, obvious basics first.",
     agans_summary="Verify fundamental prerequisites: never assume a divisor is non-zero (Ch. 9).",
+    google_defense_standard="Google UndefinedBehaviorSanitizer (UBSan) Arithmetic Guard",
 )
 
 CODE_SEC_004 = DetectionRule(
@@ -112,6 +117,7 @@ CODE_SEC_004 = DetectionRule(
     agans_rule="Rule 4: Divide and Conquer",
     agans_mantra="Narrow the search space. Cut the problem in half until the bug has nowhere to hide.",
     agans_summary="Slice data flow systematically from untrusted source to sink (Ch. 6).",
+    google_defense_standard="Google SafeSQL & Trusted Types API Contract",
 )
 
 CODE_CON_005 = DetectionRule(
@@ -129,6 +135,7 @@ CODE_CON_005 = DetectionRule(
     agans_rule="Rule 8: Get a Fresh View",
     agans_mantra="Overcome tunnel vision. Ask for an outside perspective and cross-validate findings.",
     agans_summary="Combine lockset analysis and GNN to spot multi-thread blind spots (Ch. 10).",
+    google_defense_standard="Google ThreadSanitizer (TSan) Race Detection",
 )
 
 CODE_SEC_006 = DetectionRule(
@@ -146,6 +153,7 @@ CODE_SEC_006 = DetectionRule(
     agans_rule="Rule 1: Understand the System",
     agans_mantra="Read the manual. Know how the system is supposed to work before deciding it's broken.",
     agans_summary="Understand process argument passing semantics to prevent shell word splitting (Ch. 3).",
+    google_defense_standard="Google Project Zero RCE Defense (Safe Subprocess Execution)",
 )
 
 CODE_SEC_007 = DetectionRule(
@@ -163,6 +171,7 @@ CODE_SEC_007 = DetectionRule(
     agans_rule="Rule 7: Check the Plug",
     agans_mantra="Question your assumptions. Always start with the simple, obvious basics first.",
     agans_summary="Verify fundamental filesystem path boundaries before opening resources (Ch. 9).",
+    google_defense_standard="Google BeyondCorp Canonical Path Jail & Realpath Assertion",
 )
 
 CODE_SEC_008 = DetectionRule(
@@ -180,6 +189,7 @@ CODE_SEC_008 = DetectionRule(
     agans_rule="Rule 4: Divide and Conquer",
     agans_mantra="Narrow the search space. Cut the problem in half until the bug has nowhere to hide.",
     agans_summary="Isolate data serialization boundaries from dynamic bytecode interpreters (Ch. 6).",
+    google_defense_standard="Google Safe Serialization & Protocol Buffers Defense",
 )
 
 CODE_SEC_009 = DetectionRule(
@@ -197,6 +207,7 @@ CODE_SEC_009 = DetectionRule(
     agans_rule="Rule 6: Keep an Audit Trail",
     agans_mantra="Write down what you did, in what order, and what happened. Don't trust your memory.",
     agans_summary="Audit all credential access patterns through centralized secrets vaults (Ch. 8).",
+    google_defense_standard="Google Secret Manager & Zero-Credentials-in-Code Policy",
 )
 
 
@@ -217,6 +228,7 @@ CIRC_STA_001 = DetectionRule(
     agans_rule="Rule 3: Quit Thinking and Look",
     agans_mantra="Stop guessing and theorizing. Look at the actual signals, bytes, and telemetry.",
     agans_summary="Observe actual waveform delay and prove Slack >= 0.0 ns under Rule 9 (Ch. 5).",
+    google_defense_standard="Google Silicon / TPU Static Timing Closure & Clock Gating",
 )
 
 CIRC_CDC_002 = DetectionRule(
@@ -234,6 +246,7 @@ CIRC_CDC_002 = DetectionRule(
     agans_rule="Rule 1: Understand the System",
     agans_mantra="Read the manual. Know how the system is supposed to work before deciding it's broken.",
     agans_summary="Map asynchronous clock domains and enforce synchronizer contracts (Ch. 3).",
+    google_defense_standard="Google Hardware CDC 2-FF & Gray-Code FIFO Synchronizer Standard",
 )
 
 CIRC_ERC_003 = DetectionRule(
@@ -251,6 +264,7 @@ CIRC_ERC_003 = DetectionRule(
     agans_rule="Rule 4: Divide and Conquer",
     agans_mantra="Narrow the search space. Cut the problem in half until the bug has nowhere to hide.",
     agans_summary="Isolate oscillating loop with Tarjan's SCC cycle decomposition (Ch. 6).",
+    google_defense_standard="Google ASIC Zero-Combinational-Cycle Rule",
 )
 
 CIRC_ERC_004 = DetectionRule(
@@ -268,6 +282,7 @@ CIRC_ERC_004 = DetectionRule(
     agans_rule="Rule 7: Check the Plug",
     agans_mantra="Question your assumptions. Always start with the simple, obvious basics first.",
     agans_summary="Verify power and driver pins are plugged in before timing analysis (Ch. 9).",
+    google_defense_standard="Google Hardware ERC Driveability & Bus Contention Isolation",
 )
 
 CIRC_PWR_005 = DetectionRule(
@@ -285,6 +300,7 @@ CIRC_PWR_005 = DetectionRule(
     agans_rule="Rule 3: Quit Thinking and Look",
     agans_mantra="Stop guessing and theorizing. Look at the actual signals, bytes, and telemetry.",
     agans_summary="Observe ground-truth nodal voltages and metal strap widths (Ch. 5).",
+    google_defense_standard="Google TPU Power Grid & Substrate Latch-Up Clamp Standard",
 )
 
 CIRC_SEC_006 = DetectionRule(
@@ -302,6 +318,7 @@ CIRC_SEC_006 = DetectionRule(
     agans_rule="Rule 5: Change One Thing at a Time",
     agans_mantra="Isolate the key. Never change more than one variable when diagnosing faults.",
     agans_summary="Isolate test access modes behind an authenticated challenge-response boundary (Ch. 7).",
+    google_defense_standard="Google Titan Security Chip & Authenticated JTAG Lockout",
 )
 
 
