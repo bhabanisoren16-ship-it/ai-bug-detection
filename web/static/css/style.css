@@ -204,6 +204,27 @@ body {
   gap: 12px;
 }
 
+#btn-header-rules {
+  background: #f0fdf4;
+  color: #15803d;
+  border: 1.5px solid #86efac;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 1px 3px rgba(22, 163, 74, 0.08);
+  transition: var(--transition);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+#btn-header-rules:hover {
+  background: #dcfce7;
+  border-color: #16a34a;
+  color: #14532d;
+  box-shadow: 0 2px 6px rgba(22, 163, 74, 0.18);
+  transform: translateY(-1px);
+}
+
 /* ── Badges ──────────────────────────────────────────────────────────────── */
 .pill-badge {
   background: var(--color-info-bg);
@@ -1350,4 +1371,108 @@ body.theme-light .agans-rule-banner {
   font-size: 11.5px;
   color: #334155;
   line-height: 1.5;
+}
+
+/* ── Card Agans Rule Interactive Pill ────────────────────────────────────── */
+.card-agans-section {
+  margin-top: 8px;
+  margin-bottom: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.card-agans-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 5px 12px;
+  background: #f0fdf4;
+  border: 1.5px solid #86efac;
+  border-radius: 20px;
+  cursor: pointer;
+  user-select: none;
+  font-size: 11.5px;
+  color: #15803d;
+  font-weight: 700;
+  transition: all 0.15s ease-in-out;
+  box-shadow: 0 1px 2px rgba(22, 163, 74, 0.06);
+  width: fit-content;
+  max-width: 100%;
+}
+
+.card-agans-pill:hover {
+  background: #dcfce7;
+  border-color: #22c55e;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 5px rgba(22, 163, 74, 0.15);
+}
+
+.card-agans-pill .pill-icon {
+  font-size: 12px;
+}
+
+.card-agans-pill .pill-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+.card-agans-pill .pill-chapter {
+  font-size: 10px;
+  background: #bbf7d0;
+  color: #14532d;
+  padding: 1px 6px;
+  border-radius: 10px;
+  font-weight: 800;
+  letter-spacing: 0.3px;
+}
+
+.card-agans-pill .pill-toggle-arrow {
+  font-size: 11px;
+  color: #15803d;
+  transition: transform 0.2s ease;
+  margin-left: 4px;
+}
+
+.card-agans-section.open .card-agans-pill {
+  background: #dcfce7;
+  border-color: #16a34a;
+}
+
+.card-agans-section.open .pill-toggle-arrow {
+  transform: rotate(180deg);
+}
+
+.card-agans-body {
+  padding: 10px 14px;
+  background: #f8fafc;
+  border-left: 3px solid #16a34a;
+  border-radius: 0 6px 6px 0;
+  border-top: 1px solid #e2e8f0;
+  border-right: 1px solid #e2e8f0;
+  border-bottom: 1px solid #e2e8f0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  animation: fadeIn 0.2s ease;
+}
+
+body.theme-cyberpunk .card-agans-pill {
+  background: rgba(0, 240, 255, 0.1);
+  border-color: rgba(0, 240, 255, 0.4);
+  color: #00f0ff;
+}
+
+body.theme-cyberpunk .card-agans-pill .pill-chapter {
+  background: rgba(0, 240, 255, 0.2);
+  color: #00f0ff;
+}
+
+body.theme-cyberpunk .card-agans-body {
+  background: #080d1e;
+  border-color: rgba(0, 240, 255, 0.2);
+  border-left-color: #00f0ff;
 }

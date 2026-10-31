@@ -13,10 +13,38 @@ document.addEventListener("DOMContentLoaded", () => {
     loadCatalogRules();
     loadAgansRules();
 
+    const btnHeaderRules = document.getElementById("btn-header-rules");
+    if (btnHeaderRules) {
+        btnHeaderRules.addEventListener("click", () => {
+            const tabBtnRules = document.getElementById("tab-btn-rules");
+            if (tabBtnRules) {
+                tabBtnRules.click();
+                window.scrollTo({ top: 0, behavior: "smooth" });
+            }
+        });
+    }
+
     // Default sample load: Python defect sample
     loadSampleCode("python");
     loadSampleNetlist();
 });
+
+// ── Card Agans Rule Toggle ───────────────────────────────────────────────────
+function toggleCardRule(pillElement) {
+    const section = pillElement.closest(".card-agans-section");
+    if (!section) return;
+    const body = section.querySelector(".card-agans-body");
+    if (!body) return;
+    const isOpen = section.classList.contains("open");
+    if (isOpen) {
+        section.classList.remove("open");
+        body.style.display = "none";
+    } else {
+        section.classList.add("open");
+        body.style.display = "flex";
+    }
+}
+window.toggleCardRule = toggleCardRule;
 
 // ── Theme Selector ──────────────────────────────────────────────────────────
 function initThemeSelector() {
@@ -346,13 +374,16 @@ function renderCodeResults(data, sourceCode) {
         const agansChapter = h.agans_chapter || (h.agans_protocol && h.agans_protocol.primary_info ? h.agans_protocol.primary_info.chapter_number : "");
 
         const agansBannerHtml = agansBadge ? `
-            <div class="agans-rule-banner">
-                <div class="agans-badge-row">
-                    <span class="agans-badge-pill">📖 ${escapeHtml(agansBadge)}</span>
-                    <span class="agans-chapter-tag">${agansChapter ? `Book Chapter ${agansChapter}` : "David J. Agans Book Reference"}</span>
+            <div class="card-agans-section">
+                <div class="card-agans-pill" onclick="toggleCardRule(this)" title="Click to view Agans Book Reference">
+                    <span class="pill-icon">📖</span>
+                    <span class="pill-title"><strong>${escapeHtml(agansBadge)}</strong> <span class="pill-chapter">${agansChapter ? `Ch. ${agansChapter}` : "Book Ref"}</span></span>
+                    <span class="pill-toggle-arrow">▾</span>
                 </div>
-                ${agansMantra ? `<div class="agans-mantra-text">"${escapeHtml(agansMantra)}"</div>` : ""}
-                ${agansGuidance ? `<div class="agans-guidance-text">💡 <strong>Agans Advice:</strong> ${escapeHtml(agansGuidance)}</div>` : ""}
+                <div class="card-agans-body" style="display: none;">
+                    ${agansMantra ? `<div class="agans-mantra-text">"${escapeHtml(agansMantra)}"</div>` : ""}
+                    ${agansGuidance ? `<div class="agans-guidance-text">💡 <strong>Agans Advice:</strong> ${escapeHtml(agansGuidance)}</div>` : ""}
+                </div>
             </div>
         ` : "";
 
@@ -549,13 +580,16 @@ function renderCircuitResults(data) {
         );
 
         const agansBannerHtml = `
-            <div class="agans-rule-banner">
-                <div class="agans-badge-row">
-                    <span class="agans-badge-pill">📖 ${escapeHtml(agansBadge)}</span>
-                    <span class="agans-chapter-tag">${agansChapter ? `Book Chapter ${agansChapter}` : "David J. Agans Book Reference"}</span>
+            <div class="card-agans-section">
+                <div class="card-agans-pill" onclick="toggleCardRule(this)" title="Click to view Agans Book Reference">
+                    <span class="pill-icon">📖</span>
+                    <span class="pill-title"><strong>${escapeHtml(agansBadge)}</strong> <span class="pill-chapter">${agansChapter ? `Ch. ${agansChapter}` : "Book Ref"}</span></span>
+                    <span class="pill-toggle-arrow">▾</span>
                 </div>
-                ${agansMantra ? `<div class="agans-mantra-text">"${escapeHtml(agansMantra)}"</div>` : ""}
-                ${agansGuidance ? `<div class="agans-guidance-text">💡 <strong>Agans Advice:</strong> ${escapeHtml(agansGuidance)}</div>` : ""}
+                <div class="card-agans-body" style="display: none;">
+                    ${agansMantra ? `<div class="agans-mantra-text">"${escapeHtml(agansMantra)}"</div>` : ""}
+                    ${agansGuidance ? `<div class="agans-guidance-text">💡 <strong>Agans Advice:</strong> ${escapeHtml(agansGuidance)}</div>` : ""}
+                </div>
             </div>
         `;
 
