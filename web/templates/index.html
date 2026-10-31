@@ -7,7 +7,7 @@
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
     <title>AI Bug Detection &amp; Highlighting System</title>
-    <link rel="stylesheet" href="/static/css/style.css?v=13.0">
+    <link rel="stylesheet" href="/static/css/style.css?v=14.0">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -24,6 +24,9 @@
             </div>
         </div>
         <div class="header-badges">
+            <span class="pill-badge security-shield-badge" title="Automated Security Checking &amp; Defensive Posture Active">
+                <span>🛡️</span> Defence Shield Active
+            </span>
             <button id="btn-header-rules" class="btn btn-secondary btn-sm" title="View Detection Rules &amp; Agans Book Maxims">
                 <span>📖</span> Rules Catalog
             </button>
@@ -209,7 +212,7 @@
                     <span style="font-size: 22px;">📖</span>
                     <div>
                         <div class="modal-title">Production Detection Rules &amp; David J. Agans' 9 Indispensable Rules</div>
-                        <div class="modal-subtitle">10 Formal Production Rules · 9 Agans Maxims Suitable for Framing</div>
+                        <div class="modal-subtitle">15 Formal Production Rules · 9 Agans Maxims · Full Defence Suite</div>
                     </div>
                 </div>
                 <button id="btn-close-rules-modal" class="modal-close-btn" title="Close (Esc)">✕</button>
@@ -218,18 +221,18 @@
                 <!-- Info Banner -->
                 <div class="panel-card" style="margin-bottom: 20px;">
                     <p style="padding: 14px 20px; margin: 0; font-size: 13px; color: var(--text-dim); line-height: 1.6;">
-                        Comprehensive engineering reference catalog bridging software source code ASTs, dynamic test execution, and hardware circuit netlists.
-                        Includes mathematical predicates, automated fix diff strategies, and foundational debugging principles from David J. Agans' book.
+                        Comprehensive engineering reference catalog bridging software source code ASTs, dynamic test execution, hardware circuit netlists, and full-spectrum security defense.
+                        Includes mathematical predicates, automated fix diff strategies, defensive boundary clamps, and foundational debugging principles from David J. Agans' book.
                     </p>
                 </div>
 
-                <!-- 10 Production Rules Catalog Table -->
+                <!-- 15 Production Rules Catalog Table -->
                 <section class="catalog-section" style="margin-bottom: 24px;">
                     <div class="catalog-header">
                         <div style="display: flex; align-items: center; gap: 10px;">
                             <span style="font-size: 16px;">📋</span>
                             <strong>Production Detection Rule &amp; Highlight Signature Catalog</strong>
-                            <span class="pill-badge">10 Rules Loaded</span>
+                            <span class="pill-badge" id="catalog-rules-count">15 Rules Loaded</span>
                         </div>
                         <span class="toggle-icon" style="color: var(--text-dim);">▲</span>
                     </div>
@@ -284,6 +287,6 @@
         </div>
     </div>
 
-    <script src="/static/js/app.js?v=13.0"></script>
+    <script src="/static/js/app.js?v=14.0"></script>
 </body>
 </html>

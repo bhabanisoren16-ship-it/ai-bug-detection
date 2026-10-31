@@ -453,6 +453,54 @@ RULE_TO_AGANS_MAPPING: Dict[str, Dict[str, Any]] = {
             "Rule 3 (Quit Thinking and Look): Inspect actual AST comparison operators and verify fix under Rule 9."
         ),
     },
+    "CODE-SEC-006": {
+        "primary_rule": AgansRuleId.RULE_1_UNDERSTAND,
+        "contributing_rules": [
+            AgansRuleId.RULE_7_CHECK_THE_PLUG,
+            AgansRuleId.RULE_5_CHANGE_ONE_THING,
+            AgansRuleId.RULE_9_NOT_FIXED_AINT_FIXED,
+        ],
+        "rationale": (
+            "Rule 1 (Understand the System): Process argument vectors must be strictly separated from shell interpreters. "
+            "Rule 7 (Check the Plug): Disable shell=True and enforce shlex argument tokenization."
+        ),
+    },
+    "CODE-SEC-007": {
+        "primary_rule": AgansRuleId.RULE_7_CHECK_THE_PLUG,
+        "contributing_rules": [
+            AgansRuleId.RULE_2_MAKE_IT_FAIL,
+            AgansRuleId.RULE_4_DIVIDE_AND_CONQUER,
+            AgansRuleId.RULE_9_NOT_FIXED_AINT_FIXED,
+        ],
+        "rationale": (
+            "Rule 7 (Check the Plug): Never assume user-provided paths stay within root boundaries. "
+            "Enforce canonical realpath prefix boundaries before executing filesystem I/O."
+        ),
+    },
+    "CODE-SEC-008": {
+        "primary_rule": AgansRuleId.RULE_4_DIVIDE_AND_CONQUER,
+        "contributing_rules": [
+            AgansRuleId.RULE_1_UNDERSTAND,
+            AgansRuleId.RULE_7_CHECK_THE_PLUG,
+            AgansRuleId.RULE_9_NOT_FIXED_AINT_FIXED,
+        ],
+        "rationale": (
+            "Rule 4 (Divide and Conquer): Sever the dangerous connection between untrusted serialization bytes "
+            "and dynamic Python bytecode execution by replacing pickle with safe JSON/SafeLoader schemas."
+        ),
+    },
+    "CODE-SEC-009": {
+        "primary_rule": AgansRuleId.RULE_6_KEEP_AUDIT_TRAIL,
+        "contributing_rules": [
+            AgansRuleId.RULE_8_FRESH_VIEW,
+            AgansRuleId.RULE_1_UNDERSTAND,
+            AgansRuleId.RULE_9_NOT_FIXED_AINT_FIXED,
+        ],
+        "rationale": (
+            "Rule 6 (Keep an Audit Trail): Never hardcode credentials in source control history. "
+            "Externalize secrets into audited environment variables or vault secret managers."
+        ),
+    },
 
     # Phase 2: Hardware Circuit Rules
     "CIRC-STA-001": {
@@ -515,6 +563,18 @@ RULE_TO_AGANS_MAPPING: Dict[str, Dict[str, Any]] = {
         "rationale": (
             "Analog IR-drop violations require Rule 3 (Quit Thinking and Look) to inspect GDSII metal layers and nodal "
             "voltages, combined with Rule 7 (verify V_DD supply rail integrity)."
+        ),
+    },
+    "CIRC-SEC-006": {
+        "primary_rule": AgansRuleId.RULE_5_CHANGE_ONE_THING,
+        "contributing_rules": [
+            AgansRuleId.RULE_1_UNDERSTAND,
+            AgansRuleId.RULE_7_CHECK_THE_PLUG,
+            AgansRuleId.RULE_9_NOT_FIXED_AINT_FIXED,
+        ],
+        "rationale": (
+            "Hardware test interfaces and scan chains must be isolated from internal functional registers. "
+            "Rule 5 (Change One Thing) enforces authenticated gate-level mode isolation."
         ),
     },
 }

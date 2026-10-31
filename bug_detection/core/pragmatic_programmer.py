@@ -598,6 +598,42 @@ class PragmaticAnalyzer:
                     "step_2": "Encapsulate data querying behind a strongly-typed repository interface.",
                     "step_3": "Isolate input validation at the boundary, ensuring raw user strings never reach SQL engines.",
                 })
+            elif "SEC-006" in rule_id or "command" in msg.lower():
+                advice_list.append({
+                    "rule_id": rule_id,
+                    "principle": "Tip 38: Crash Early & Tip 40: Act, Don't Guess",
+                    "pragmatic_tip": "Tip 38: Dead Programs Tell No Lies",
+                    "step_1": "Disable shell=True immediately to eliminate shell word splitting and command chaining.",
+                    "step_2": "Pass process arguments as a rigid array: subprocess.run(['cmd', arg], check=True).",
+                    "step_3": "Validate executable targets against an allowed whitelist binary directory.",
+                })
+            elif "SEC-007" in rule_id or "traversal" in msg.lower():
+                advice_list.append({
+                    "rule_id": rule_id,
+                    "principle": "Tip 37: Design with Contracts & Tip 39: Assertive Programming",
+                    "pragmatic_tip": "Tip 39: Use Assertions to Prevent the Impossible",
+                    "step_1": "Enforce canonical realpath boundary clamp: os.path.realpath(target).startswith(ALLOWED_ROOT).",
+                    "step_2": "Reject any path containing '..' tokens or absolute path overrides before filesystem I/O.",
+                    "step_3": "Employ unprivileged service accounts with read-only filesystem jail restrictions.",
+                })
+            elif "SEC-008" in rule_id or "deserialization" in msg.lower():
+                advice_list.append({
+                    "rule_id": rule_id,
+                    "principle": "Tip 14: Orthogonality & Tip 42: Don't Outrun Your Headlights",
+                    "pragmatic_tip": "Tip 42: Take Small Steps — Always",
+                    "step_1": "Completely remove pickle.loads/load on untrusted input networks.",
+                    "step_2": "Replace with strict data-only formats: json.loads() or protobuf/pydantic models.",
+                    "step_3": "For YAML workflows, strictly enforce Loader=yaml.SafeLoader.",
+                })
+            elif "SEC-009" in rule_id or "credential" in msg.lower():
+                advice_list.append({
+                    "rule_id": rule_id,
+                    "principle": "Tip 2: Care About Your Craft & Tip 30: Algorithms Matter",
+                    "pragmatic_tip": "Tip 2: Think! About Your Work",
+                    "step_1": "Purge hardcoded secret literals from source code and git commit history.",
+                    "step_2": "Inject secrets at runtime via os.environ.get('VAR') or AWS KMS / HashiCorp Vault.",
+                    "step_3": "Add automated pre-commit scanning hooks to block accidental credential commits.",
+                })
             elif "STA-001" in rule_id or "slack" in msg.lower():
                 advice_list.append({
                     "rule_id": rule_id,
@@ -618,6 +654,81 @@ class PragmaticAnalyzer:
                 })
 
         return advice_list
+
+    @staticmethod
+    def audit_security_defense(
+        source_code: str,
+        diagnostics: List[Any],
+    ) -> Dict[str, Any]:
+        """
+        Audit code against Defensive Programming and Security Posture standards.
+        
+        Calculates:
+        - Defensive Coverage Score (0-100)
+        - Defense Grade (A+, A, B, C, F)
+        - Security Vulnerabilities localized
+        - Defensive Guard Count (null checks, boundary clamps, type guards, try/except)
+        - Pragmatic Defense Directives
+        """
+        lines = source_code.splitlines()
+        sec_diags = [d for d in diagnostics if "SEC-" in getattr(d, "rule_id", "")]
+        crit_diags = [d for d in diagnostics if getattr(d, "severity", "") == "CRITICAL"]
+
+        guard_count = sum(
+            1 for l in lines
+            if any(kw in l for kw in [
+                "if ", "is not None", "!= None", "isinstance(", "assert ", "try:",
+                "startswith(", "realpath(", "commonpath(", "shlex.quote(", "SafeLoader",
+                "params =", "with lock:", "with mutex:"
+            ])
+        )
+
+        base_score = 100
+        base_score -= len(sec_diags) * 20
+        base_score -= max(0, len(crit_diags) - len(sec_diags)) * 10
+        base_score = max(0, min(100, base_score + min(guard_count * 2, 20)))
+
+        # If security vulnerabilities exist, cap maximum score and enforce strict defensive deficit
+        if sec_diags:
+            base_score = min(base_score, 50 if len(sec_diags) == 1 else 25)
+
+        if base_score >= 95 and not sec_diags:
+            grade = "A+"
+            status = "HARDENED"
+        elif base_score >= 80 and not sec_diags:
+            grade = "A"
+            status = "STRONG"
+        elif base_score >= 65 and not sec_diags:
+            grade = "B"
+            status = "MODERATE"
+        elif base_score >= 40:
+            grade = "C"
+            status = "VULNERABLE"
+        else:
+            grade = "F"
+            status = "CRITICAL_DEFENSE_DEFICIT"
+
+        directives = []
+        if any("SEC-004" in getattr(d, "rule_id", "") for d in diagnostics):
+            directives.append("Enforce parameterized queries at API boundary (Tip 14).")
+        if any("SEC-006" in getattr(d, "rule_id", "") for d in diagnostics):
+            directives.append("Deactivate shell=True in subprocess calls immediately (Tip 38).")
+        if any("SEC-007" in getattr(d, "rule_id", "") for d in diagnostics):
+            directives.append("Enforce canonical realpath directory clamp on file paths (Tip 39).")
+        if any("SEC-008" in getattr(d, "rule_id", "") for d in diagnostics):
+            directives.append("Migrate untrusted unpickling to safe JSON/SafeLoader schemas (Tip 42).")
+        if any("SEC-009" in getattr(d, "rule_id", "") for d in diagnostics):
+            directives.append("Extract hardcoded secrets into secure environment variables (Tip 2).")
+
+        return {
+            "defensive_score": base_score,
+            "defensive_grade": grade,
+            "shield_status": status,
+            "security_vulnerabilities": len(sec_diags),
+            "critical_defects": len(crit_diags),
+            "defensive_guards_detected": guard_count,
+            "directives": directives,
+        }
 
 
 def get_all_pragmatic_tips() -> List[Dict[str, Any]]:

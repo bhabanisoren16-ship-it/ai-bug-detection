@@ -376,6 +376,14 @@ function renderCodeResults(data, sourceCode) {
         statStatus.style.color = crit > 0 ? "#dc2626" : (highlights.length > 0 ? "#d97706" : "#16a34a");
     }
 
+    // Update Defence Shield Badge
+    const secDefense = data.security_defense_posture || (data.pragmatic_analysis ? data.pragmatic_analysis.security_defense : null);
+    const shieldBadge = document.getElementById("defense-shield-badge");
+    if (shieldBadge && secDefense) {
+        shieldBadge.innerHTML = `<span>🛡️</span> Defence: ${escapeHtml(secDefense.defensive_grade)} (${secDefense.defensive_score}/100)`;
+        shieldBadge.title = `Defensive Posture: ${secDefense.shield_status} · Guards: ${secDefense.defensive_guards_detected}`;
+    }
+
     if (highlights.length === 0) {
         resultsContainer.innerHTML = `
             <div class="empty-state">
@@ -462,6 +470,9 @@ function renderCodeResults(data, sourceCode) {
             `;
         }
 
+        const isSecurity = (h.rule_id || "").includes("SEC") || (h.category || "").toLowerCase().includes("security") || (h.message || "").toLowerCase().includes("injection") || (h.message || "").toLowerCase().includes("traversal") || (h.message || "").toLowerCase().includes("credential") || (h.message || "").toLowerCase().includes("deserialization");
+        const secBadgeHtml = isSecurity ? `<span class="badge badge-security">🛡️ Security Alert</span>` : "";
+
         html += `
             <div class="diag-card ${sevClass}" id="diag-card-${h.diagnostic_id || idx}">
                 <div class="diag-header">
@@ -469,6 +480,7 @@ function renderCodeResults(data, sourceCode) {
                         <span class="badge ${sevClass}">${escapeHtml(h.severity)}</span>
                         <strong>${escapeHtml(h.category || "Bug")}</strong>
                         <span style="font-family: monospace; font-size: 11px; color: var(--text-dim);">${escapeHtml(h.rule_id)}</span>
+                        ${secBadgeHtml}
                     </div>
                     <span class="diag-location">Line ${lineNum}:${colNum}</span>
                 </div>
@@ -621,6 +633,9 @@ function renderCircuitResults(data) {
             </div>
         `;
 
+        const isCircSecurity = (h.rule_id || "").includes("SEC") || (h.category || "").toLowerCase().includes("security") || (h.message || "").toLowerCase().includes("security") || (h.message || "").toLowerCase().includes("trojan");
+        const circSecBadgeHtml = isCircSecurity ? `<span class="badge badge-security">🛡️ Hardware Security Alert</span>` : "";
+
         html += `
             <div class="diag-card ${sevClass}">
                 <div class="diag-header">
@@ -628,6 +643,7 @@ function renderCircuitResults(data) {
                         <span class="badge ${sevClass}">${escapeHtml(h.severity)}</span>
                         <strong>${escapeHtml(h.category || "Circuit Defect")}</strong>
                         <span style="font-family: monospace; font-size: 11px; color: var(--text-dim);">${escapeHtml(h.rule_id)}</span>
+                        ${circSecBadgeHtml}
                     </div>
                     <span class="diag-location">Net: ${escapeHtml(h.net || "N/A")}</span>
                 </div>
@@ -696,6 +712,9 @@ async function loadCatalogRules() {
         const data = await res.json();
         const rules = data.rules || [];
 
+        const countBadge = document.getElementById("catalog-rules-count");
+        if (countBadge) countBadge.textContent = `${rules.length} Rules Loaded · Full Defence Suite`;
+
         let html = "";
         rules.forEach(r => {
             const ruleId = r.rule_id || "";
@@ -708,12 +727,14 @@ async function loadCatalogRules() {
             const agansSummary = r.agans_summary || "";
             const phaseLabel = phase === "PHASE_1_CODE" ? "Phase 1: Code" : "Phase 2: Circuit";
             const phaseClass = phase === "PHASE_1_CODE" ? "info" : "purple";
+            const isSec = ruleId.includes("SEC") || (r.tags && r.tags.includes("security"));
+            const secTag = isSec ? `<span class="badge badge-security" style="margin-left: 6px;">🛡️ Security</span>` : "";
 
             html += `
                 <tr>
                     <td class="col-rule"><code class="rule-code">${escapeHtml(ruleId)}</code></td>
                     <td class="col-phase"><span class="badge ${phaseClass}">${escapeHtml(phaseLabel)}</span></td>
-                    <td class="col-category"><strong class="category-title">${escapeHtml(category)}</strong></td>
+                    <td class="col-category"><strong class="category-title">${escapeHtml(category)} ${secTag}</strong></td>
                     <td class="col-predicate"><div class="predicate-box">${escapeHtml(predicate)}</div></td>
                     <td class="col-fix"><div class="fix-box">${escapeHtml(fix)}</div></td>
                     <td class="col-agans">

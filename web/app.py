@@ -29,6 +29,7 @@ from flask import (
     send_from_directory,
 )
 from flask_cors import CORS
+from werkzeug.exceptions import HTTPException
 
 # ── Ensure the project root is on sys.path for imports ────────────────────────
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
@@ -77,6 +78,42 @@ app = Flask(
     static_folder=str(Path(__file__).resolve().parent / "static"),
 )
 CORS(app)
+
+# ── Defensive Web Shield Configuration ───────────────────────────────────────
+app.config['MAX_CONTENT_LENGTH'] = 2 * 1024 * 1024  # 2MB defensive limit against memory DoS
+app.config['JSON_SORT_KEYS'] = False
+
+@app.after_request
+def apply_security_defence_headers(response):
+    """
+    Enforce strict defense-in-depth HTTP security headers on all responses:
+    - Protect against Cross-Site Scripting (XSS)
+    - Prevent Clickjacking / UI Redress attacks
+    - Block MIME type sniffing
+    - Enforce Strict Content Security Policy
+    """
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["X-Frame-Options"] = "SAMEORIGIN"
+    response.headers["X-XSS-Protection"] = "1; mode=block"
+    response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+    response.headers["Permissions-Policy"] = "camera=(), microphone=(), geolocation=()"
+    response.headers["Content-Security-Policy"] = (
+        "default-src 'self'; "
+        "script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; "
+        "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; "
+        "font-src 'self' https://fonts.gstatic.com data:; "
+        "img-src 'self' data:; "
+        "connect-src 'self'"
+    )
+    return response
+
+@app.errorhandler(413)
+def request_entity_too_large(error):
+    """Defensive handler against large payload DoS attacks."""
+    return jsonify({
+        "error": "Payload Too Large: Request body exceeds defensive limit (2MB).",
+        "shield_status": "BLOCKED",
+    }), 413
 
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -388,6 +425,157 @@ def _analyze_phase1_code(source_code: str, language: str) -> List[BugDiagnostic]
                         summary="Wrap access in a threading.Lock() context manager.",
                         unified_diff=diff_patch,
                         replacement_code_or_netlist=f"with lock:\n    {stripped}",
+                    ),
+                )
+                diagnostics.append(diag)
+
+        # ── CODE-SEC-006: Command Injection / Shell Execution ─────────────
+        cmd_keywords = ["subprocess.Popen(", "subprocess.run(", "subprocess.call(", "subprocess.check_output(", "os.system(", "os.popen("]
+        if any(ck in stripped for ck in cmd_keywords):
+            has_shell_true = "shell=True" in stripped or "shell = True" in stripped
+            has_taint_cmd = any(t in stripped for t in taint_sources.keys()) or ("+" in stripped and ("os.system(" in stripped or "os.popen(" in stripped))
+            if has_shell_true or has_taint_cmd:
+                s_rule = severity_from_rule("CRITICAL")
+                s_ochiai = ochiai_suspiciousness(n_ef=8, n_ep=1, n_nf=1)
+                p_gnn = 0.94
+                r_total = hybrid_priority_score(s_rule, s_ochiai, p_gnn)
+
+                if has_shell_true:
+                    clean_line = stripped.replace("shell=True", "shell=False").replace("shell = True", "shell=False")
+                    diff_patch = (
+                        f"- {stripped}\n"
+                        f"+ {clean_line}  # Disabled shell execution"
+                    )
+                else:
+                    diff_patch = (
+                        f"- {stripped}\n"
+                        f"+ # Defensive remediation: Pass arguments as structured array\n"
+                        f"+ subprocess.run(shlex.split(command), check=True)"
+                    )
+
+                diag = BugDiagnostic(
+                    phase="PHASE_1_CODE",
+                    rule_id="CODE-SEC-006",
+                    severity="CRITICAL",
+                    message=f"Command Injection vulnerability: Unrestricted shell execution detected at line {line_num}.",
+                    scores={"S_rule": round(s_rule, 4), "S_ochiai": round(s_ochiai, 4), "P_gnn": round(p_gnn, 4), "R_total": round(r_total, 4)},
+                    code_span=CodeSpan(file=filename, start_line=line_num, start_col=0, end_line=line_num, end_col=len(stripped)),
+                    causal_trace=[
+                        CausalStep(1, "Untrusted or dynamic command string passed to execution sink", file=filename, line=line_num),
+                        CausalStep(2, "Subprocess invoked through shell interpreter allowing command chaining", file=filename, line=line_num),
+                    ],
+                    auto_remediation=AutoRemediation(
+                        summary="Disable shell=True and pass arguments as an array or wrap in shlex.quote().",
+                        unified_diff=diff_patch,
+                        replacement_code_or_netlist=diff_patch,
+                    ),
+                )
+                diagnostics.append(diag)
+
+        # ── CODE-SEC-007: Path Traversal / Arbitrary File Access ───────────
+        if ("open(" in stripped or "pathlib.Path(" in stripped) and any(kw in stripped for kw in ["user_", "filename", "filepath", "path", "file_name"]):
+            has_traversal_guard = any(
+                g in l for l in lines[max(0, line_idx - 3):line_idx + 1]
+                for g in ["startswith(BASE_DIR)", "realpath", "commonpath", "abspath", "ALLOWED_DIR"]
+            )
+            if not has_traversal_guard:
+                s_rule = severity_from_rule("CRITICAL")
+                s_ochiai = ochiai_suspiciousness(n_ef=7, n_ep=1, n_nf=2)
+                p_gnn = 0.90
+                r_total = hybrid_priority_score(s_rule, s_ochiai, p_gnn)
+
+                diff_patch = (
+                    f"+ # Defensive boundary clamp against path traversal (../)\n"
+                    f"+ if not os.path.realpath(filepath).startswith(os.path.realpath(BASE_DIR)):\n"
+                    f"+     raise PermissionError('Path traversal detected')\n"
+                    f"  {stripped}"
+                )
+
+                diag = BugDiagnostic(
+                    phase="PHASE_1_CODE",
+                    rule_id="CODE-SEC-007",
+                    severity="CRITICAL",
+                    message=f"Path Traversal risk: File accessed without canonical realpath boundary clamp at line {line_num}.",
+                    scores={"S_rule": round(s_rule, 4), "S_ochiai": round(s_ochiai, 4), "P_gnn": round(p_gnn, 4), "R_total": round(r_total, 4)},
+                    code_span=CodeSpan(file=filename, start_line=line_num, start_col=0, end_line=line_num, end_col=len(stripped)),
+                    causal_trace=[
+                        CausalStep(1, "Filesystem path received from variable without canonicalization", file=filename, line=line_num),
+                        CausalStep(2, "Resource opened directly without allowed root prefix check", file=filename, line=line_num),
+                    ],
+                    auto_remediation=AutoRemediation(
+                        summary="Enforce realpath boundary validation: realpath(path).startswith(ALLOWED_DIR).",
+                        unified_diff=diff_patch,
+                        replacement_code_or_netlist=diff_patch,
+                    ),
+                )
+                diagnostics.append(diag)
+
+        # ── CODE-SEC-008: Insecure Deserialization ────────────────────────
+        if any(dk in stripped for dk in ["pickle.loads(", "pickle.load(", "yaml.load(", "marshal.loads("]):
+            is_safe_yaml = "SafeLoader" in stripped or "safe_load" in stripped
+            if not is_safe_yaml:
+                s_rule = severity_from_rule("CRITICAL")
+                s_ochiai = ochiai_suspiciousness(n_ef=9, n_ep=0, n_nf=1)
+                p_gnn = 0.95
+                r_total = hybrid_priority_score(s_rule, s_ochiai, p_gnn)
+
+                safe_replacement = stripped.replace("pickle.loads(", "json.loads(").replace("yaml.load(", "yaml.safe_load(")
+                diff_patch = (
+                    f"- {stripped}\n"
+                    f"+ {safe_replacement}  # Replaced dangerous unpickling with safe schema deserializer"
+                )
+
+                diag = BugDiagnostic(
+                    phase="PHASE_1_CODE",
+                    rule_id="CODE-SEC-008",
+                    severity="CRITICAL",
+                    message=f"Insecure Deserialization: Arbitrary object deserialization detected at line {line_num}. Leads to RCE.",
+                    scores={"S_rule": round(s_rule, 4), "S_ochiai": round(s_ochiai, 4), "P_gnn": round(p_gnn, 4), "R_total": round(r_total, 4)},
+                    code_span=CodeSpan(file=filename, start_line=line_num, start_col=0, end_line=line_num, end_col=len(stripped)),
+                    causal_trace=[
+                        CausalStep(1, "Dynamic bytecode deserializer invoked on raw payload", file=filename, line=line_num),
+                        CausalStep(2, "Arbitrary class instantiation allows remote code execution", file=filename, line=line_num),
+                    ],
+                    auto_remediation=AutoRemediation(
+                        summary="Switch from pickle to safe JSON or yaml.safe_load().",
+                        unified_diff=diff_patch,
+                        replacement_code_or_netlist=safe_replacement,
+                    ),
+                )
+                diagnostics.append(diag)
+
+        # ── CODE-SEC-009: Hardcoded Secrets & Credentials ─────────────────
+        secret_match = re.search(r'([A-Za-z0-9_]*(?:api_key|secret|password|auth_token|private_key|token)[A-Za-z0-9_]*)\s*=\s*["\']([^"\']{8,})["\']', stripped, re.IGNORECASE)
+        if secret_match:
+            sec_var = secret_match.group(1)
+            sec_val = secret_match.group(2)
+            is_placeholder = sec_val.lower() in ["placeholder", "your_key_here", "none", "password123", "default_token"]
+            if not is_placeholder:
+                s_rule = severity_from_rule("CRITICAL")
+                s_ochiai = ochiai_suspiciousness(n_ef=6, n_ep=1, n_nf=1)
+                p_gnn = 0.92
+                r_total = hybrid_priority_score(s_rule, s_ochiai, p_gnn)
+
+                diff_patch = (
+                    f'- {stripped}\n'
+                    f'+ {sec_var} = os.environ.get("{sec_var.upper()}", "")  # Externalized credential'
+                )
+
+                diag = BugDiagnostic(
+                    phase="PHASE_1_CODE",
+                    rule_id="CODE-SEC-009",
+                    severity="CRITICAL",
+                    message=f"Hardcoded Credential: Secret string assigned to '{sec_var}' at line {line_num}. Leaks across version control.",
+                    scores={"S_rule": round(s_rule, 4), "S_ochiai": round(s_ochiai, 4), "P_gnn": round(p_gnn, 4), "R_total": round(r_total, 4)},
+                    code_span=CodeSpan(file=filename, start_line=line_num, start_col=0, end_line=line_num, end_col=len(stripped)),
+                    causal_trace=[
+                        CausalStep(1, f"Plaintext secret credential assigned to '{sec_var}'", file=filename, line=line_num),
+                        CausalStep(2, "Exposure risk in git logs, crash reports, and decompiled binaries", file=filename, line=line_num),
+                    ],
+                    auto_remediation=AutoRemediation(
+                        summary="Load secret from environment variable via os.environ.get().",
+                        unified_diff=diff_patch,
+                        replacement_code_or_netlist=f'{sec_var} = os.environ.get("{sec_var.upper()}", "")',
                     ),
                 )
                 diagnostics.append(diag)
@@ -851,6 +1039,41 @@ def _analyze_phase2_circuit(netlist: Dict[str, Any]) -> List[BugDiagnostic]:
                 diagnostics.append(diag)
                 break  # Report first cycle found
 
+    # ── CIRC-SEC-006: Hardware Trojan / Unauthenticated Test Port ─────────
+    for net in nets:
+        net_name = (net.get("name") or "").lower()
+        if any(tk in net_name for tk in ["jtag", "scan_en", "test_mode", "debug_auth", "bist_en"]):
+            sinks = net.get("sinks", [])
+            drivers = net.get("drivers", [])
+            has_auth = any("lock" in str(s).lower() or "auth" in str(s).lower() or "efuse" in str(s).lower() for s in sinks + drivers)
+            if not has_auth and len(sinks) > 0:
+                s_rule = severity_from_rule("CRITICAL")
+                p_gnn = 0.93
+                r_total = hybrid_priority_score(s_rule, 0.85, p_gnn)
+
+                diag = BugDiagnostic(
+                    phase="PHASE_2_CIRCUIT",
+                    rule_id="CIRC-SEC-006",
+                    severity="CRITICAL",
+                    message=f"Hardware Security Vulnerability: Unauthenticated test net '{net.get('name')}' directly drives internal logic without security lockout.",
+                    scores={"S_rule": round(s_rule, 4), "S_ochiai": 0.85, "P_gnn": round(p_gnn, 4), "R_total": round(r_total, 4)},
+                    circuit_probe=CircuitProbe(
+                        module=module,
+                        net_names=[net.get("name", "")],
+                        gate_instances=drivers + sinks,
+                    ),
+                    causal_trace=[
+                        CausalStep(1, f"Test port net '{net.get('name')}' connected without security controller"),
+                        CausalStep(2, f"Direct access to internal registers allows malicious state override / Trojan activation"),
+                    ],
+                    auto_remediation=AutoRemediation(
+                        summary="Insert JTAG cryptographic challenge-response authentication gate or eFuse security lockout.",
+                        unified_diff=f"- net {net.get('name')} -> {sinks}\n+ net {net.get('name')} -> jtag_auth_lock -> {sinks}",
+                        replacement_code_or_netlist=f"Instantiate security lock cell on '{net.get('name')}'",
+                    ),
+                )
+                diagnostics.append(diag)
+
     return diagnostics
 
 
@@ -859,11 +1082,32 @@ def _analyze_phase2_circuit(netlist: Dict[str, Any]) -> List[BugDiagnostic]:
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 @app.after_request
-def add_no_cache_headers(response):
-    """Ensure browsers and CDNs do not cache responses during active development."""
+def add_security_and_no_cache_headers(response):
+    """
+    Ensure browsers and CDNs do not cache responses during active development,
+    and enforce strict defense-in-depth HTTP security headers:
+    - X-Content-Type-Options: nosniff
+    - X-Frame-Options: SAMEORIGIN
+    - X-XSS-Protection: 1; mode=block
+    - Content-Security-Policy
+    - Referrer-Policy
+    """
     response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
     response.headers["Pragma"] = "no-cache"
     response.headers["Expires"] = "0"
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["X-Frame-Options"] = "SAMEORIGIN"
+    response.headers["X-XSS-Protection"] = "1; mode=block"
+    response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+    response.headers["Permissions-Policy"] = "camera=(), microphone=(), geolocation=()"
+    response.headers["Content-Security-Policy"] = (
+        "default-src 'self'; "
+        "script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; "
+        "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; "
+        "font-src 'self' https://fonts.gstatic.com data:; "
+        "img-src 'self' data:; "
+        "connect-src 'self'"
+    )
     return response
 
 
@@ -889,7 +1133,7 @@ def analyze_code():
         }
 
     Returns:
-        JSON with verification report containing diagnostics.
+        JSON with verification report containing diagnostics and security defense audit.
     """
     try:
         data = request.get_json(force=True)
@@ -907,12 +1151,14 @@ def analyze_code():
 
         rep_dict = report.to_dict()
 
-        # Pragmatic Programmer Analytics
+        # Pragmatic Programmer Analytics & Security Defense
         bw_report = PragmaticAnalyzer.compute_broken_windows(diagnostics, source_code)
         contracts = PragmaticAnalyzer.inspect_contracts(source_code, diagnostics)
         refactoring = PragmaticAnalyzer.get_refactoring_advice(diagnostics)
         tracer = PragmaticAnalyzer.run_tracer_bullet(source_code)
+        sec_defense = PragmaticAnalyzer.audit_security_defense(source_code, diagnostics)
 
+        rep_dict["security_defense_posture"] = sec_defense
         rep_dict["pragmatic_analysis"] = {
             "broken_windows": {
                 "total_score": bw_report.total_score,
@@ -924,6 +1170,7 @@ def analyze_code():
             },
             "contract_violations": [c.__dict__ for c in contracts],
             "refactoring_advice": refactoring,
+            "security_defense": sec_defense,
             "tracer_bullet": {
                 "success": tracer.success,
                 "total_duration_ms": tracer.total_duration_ms,
@@ -935,6 +1182,8 @@ def analyze_code():
 
         return jsonify(rep_dict), 200
 
+    except HTTPException:
+        raise
     except Exception as exc:
         traceback.print_exc()
         return jsonify({"error": str(exc)}), 500
@@ -1000,6 +1249,8 @@ def analyze_circuit():
 
     except json.JSONDecodeError as exc:
         return jsonify({"error": f"Invalid JSON: {exc}"}), 400
+    except HTTPException:
+        raise
     except Exception as exc:
         traceback.print_exc()
         return jsonify({"error": str(exc)}), 500
@@ -1057,6 +1308,8 @@ def analyze_file():
 
         return jsonify(report.to_dict()), 200
 
+    except HTTPException:
+        raise
     except Exception as exc:
         traceback.print_exc()
         return jsonify({"error": str(exc)}), 500

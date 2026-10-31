@@ -131,6 +131,74 @@ CODE_CON_005 = DetectionRule(
     agans_summary="Combine lockset analysis and GNN to spot multi-thread blind spots (Ch. 10).",
 )
 
+CODE_SEC_006 = DetectionRule(
+    rule_id="CODE-SEC-006",
+    phase="PHASE_1_CODE",
+    category="Command Injection / Insecure Shell Execution",
+    detection_predicate=(
+        "Call to subprocess or os.system with shell=True or unescaped string formatting "
+        "reachable from unvalidated input."
+    ),
+    severity="CRITICAL",
+    highlight_hex="#D92D20",
+    fix_strategy="Set shell=False and pass args as sanitized array, or wrap in shlex.quote().",
+    tags=["security", "injection", "command-injection", "rce", "shell"],
+    agans_rule="Rule 1: Understand the System",
+    agans_mantra="Read the manual. Know how the system is supposed to work before deciding it's broken.",
+    agans_summary="Understand process argument passing semantics to prevent shell word splitting (Ch. 3).",
+)
+
+CODE_SEC_007 = DetectionRule(
+    rule_id="CODE-SEC-007",
+    phase="PHASE_1_CODE",
+    category="Path Traversal / Arbitrary File Read",
+    detection_predicate=(
+        "File open/read sink receives path containing unescaped relative traversal tokens (../) "
+        "without canonical directory boundary clamp."
+    ),
+    severity="CRITICAL",
+    highlight_hex="#D92D20",
+    fix_strategy="Enforce realpath boundary check: os.path.realpath(path).startswith(BASE_DIR).",
+    tags=["security", "path-traversal", "filesystem", "boundary-check"],
+    agans_rule="Rule 7: Check the Plug",
+    agans_mantra="Question your assumptions. Always start with the simple, obvious basics first.",
+    agans_summary="Verify fundamental filesystem path boundaries before opening resources (Ch. 9).",
+)
+
+CODE_SEC_008 = DetectionRule(
+    rule_id="CODE-SEC-008",
+    phase="PHASE_1_CODE",
+    category="Insecure Deserialization / Object Code Execution",
+    detection_predicate=(
+        "Untrusted byte stream decoded via pickle.loads(), yaml.load() without SafeLoader, "
+        "or marshal.loads()."
+    ),
+    severity="CRITICAL",
+    highlight_hex="#D92D20",
+    fix_strategy="Replace with safe serialization: json.loads() or yaml.safe_load().",
+    tags=["security", "deserialization", "rce", "pickle", "type-safety"],
+    agans_rule="Rule 4: Divide and Conquer",
+    agans_mantra="Narrow the search space. Cut the problem in half until the bug has nowhere to hide.",
+    agans_summary="Isolate data serialization boundaries from dynamic bytecode interpreters (Ch. 6).",
+)
+
+CODE_SEC_009 = DetectionRule(
+    rule_id="CODE-SEC-009",
+    phase="PHASE_1_CODE",
+    category="Hardcoded Secret / High-Entropy Credential",
+    detection_predicate=(
+        "High-entropy literal string or private key assigned to security credential variable "
+        "(api_key, token, password, private_key)."
+    ),
+    severity="CRITICAL",
+    highlight_hex="#D92D20",
+    fix_strategy="Extract secret to environment variable os.environ.get() or vault secret store.",
+    tags=["security", "credentials", "secrets", "compliance"],
+    agans_rule="Rule 6: Keep an Audit Trail",
+    agans_mantra="Write down what you did, in what order, and what happened. Don't trust your memory.",
+    agans_summary="Audit all credential access patterns through centralized secrets vaults (Ch. 8).",
+)
+
 
 # ─── Phase 2: Circuit / Hardware Detection Rules (Section 5.2) ───────────────
 
@@ -219,13 +287,32 @@ CIRC_PWR_005 = DetectionRule(
     agans_summary="Observe ground-truth nodal voltages and metal strap widths (Ch. 5).",
 )
 
+CIRC_SEC_006 = DetectionRule(
+    rule_id="CIRC-SEC-006",
+    phase="PHASE_2_CIRCUIT",
+    category="Hardware Trojan / Unauthenticated Test Port",
+    detection_predicate=(
+        "Scan test chain or JTAG net connects to internal configuration registers "
+        "without cryptographic authentication or eFuse lock."
+    ),
+    severity="CRITICAL",
+    highlight_hex="#D92D20",
+    fix_strategy="Insert JTAG security lock controller or eFuse challenge-response register.",
+    tags=["security", "hardware-trojan", "jtag", "tamper", "supply-chain"],
+    agans_rule="Rule 5: Change One Thing at a Time",
+    agans_mantra="Isolate the key. Never change more than one variable when diagnosing faults.",
+    agans_summary="Isolate test access modes behind an authenticated challenge-response boundary (Ch. 7).",
+)
+
 
 # ─── Catalog Index ────────────────────────────────────────────────────────────
 
 ALL_RULES: Dict[str, DetectionRule] = {
     r.rule_id: r for r in [
         CODE_MEM_001, CODE_MEM_002, CODE_NUM_003, CODE_SEC_004, CODE_CON_005,
+        CODE_SEC_006, CODE_SEC_007, CODE_SEC_008, CODE_SEC_009,
         CIRC_STA_001, CIRC_CDC_002, CIRC_ERC_003, CIRC_ERC_004, CIRC_PWR_005,
+        CIRC_SEC_006,
     ]
 }
 
