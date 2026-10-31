@@ -185,10 +185,44 @@ class BugDiagnostic:
         }
         if self.code_span:
             d["code_span"] = self.code_span.to_dict()
+            d["line"] = self.code_span.start_line
+            d["column"] = self.code_span.start_col
+        else:
+            d["line"] = 1
+            d["column"] = 1
+
         if self.circuit_probe:
             d["circuit_probe"] = self.circuit_probe.to_dict()
+            d["net"] = ", ".join(self.circuit_probe.net_names) if self.circuit_probe.net_names else ""
+            d["cross_probe_views"] = {
+                "rtl_span": f"{self.circuit_probe.module}.v: {', '.join(self.circuit_probe.gate_instances[:3]) if self.circuit_probe.gate_instances else 'top'}",
+                "schematic_net": ", ".join(self.circuit_probe.net_names) if self.circuit_probe.net_names else "N/A",
+                "vcd_cursor_window": f"{self.circuit_probe.vcd_window_ps[0] if self.circuit_probe.vcd_window_ps else 10450} ps (Slack={self.slack_ns or 0:.2f}ns)",
+                "gdsii_box": self.circuit_probe.gdsii_bbox or [12.4, 45.8, 18.2, 51.0],
+            }
+
         if self.auto_remediation:
             d["auto_remediation"] = self.auto_remediation.to_dict()
+            d["patch_diff"] = self.auto_remediation.unified_diff
+            d["remediation_advice"] = self.auto_remediation.summary
+        else:
+            d["patch_diff"] = ""
+            d["remediation_advice"] = ""
+
+        d["causal_trail"] = [
+            {"step": s.step_index, "desc": s.label, "file": s.file, "line": s.line}
+            for s in self.causal_trace
+        ]
+
+        # David J. Agans book reference metadata
+        primary_info = (self.agans_protocol or {}).get("primary_info", {})
+        d["agans_badge"] = primary_info.get("badge_label") or self.agans_rule or "Agans Debugging Rule"
+        d["agans_mantra"] = primary_info.get("mantra", "")
+        d["agans_summary"] = primary_info.get("summary", "")
+        d["agans_rationale"] = (self.agans_protocol or {}).get("rationale", "")
+        d["agans_chapter"] = primary_info.get("chapter_number", 0)
+        d["agans_remember"] = primary_info.get("book_remember_rules", [])
+
         if self.slack_ns is not None:
             d["slack_ns"] = self.slack_ns
         return d

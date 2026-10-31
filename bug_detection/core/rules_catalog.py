@@ -27,6 +27,7 @@ class DetectionRule:
     fix_strategy: str           # Automated remediation description
     tags: List[str] = field(default_factory=list)
     agans_rule: str = ""        # Reference to David J. Agans' 9 Indispensable Rules
+    agans_mantra: str = ""      # Exact maxim from Agans book
     agans_summary: str = ""     # Principle rationale from Agans
 
     def to_dict(self) -> dict:
@@ -40,6 +41,7 @@ class DetectionRule:
             "fix_strategy": self.fix_strategy,
             "tags": self.tags,
             "agans_rule": self.agans_rule,
+            "agans_mantra": self.agans_mantra,
             "agans_summary": self.agans_summary,
         }
 
@@ -58,7 +60,8 @@ CODE_MEM_001 = DetectionRule(
     fix_strategy="Nullify pointer or return early after deallocation.",
     tags=["memory", "safety", "use-after-free", "double-free"],
     agans_rule="Rule 6: Keep an Audit Trail",
-    agans_summary="Track chronological allocation, free, and dereference events.",
+    agans_mantra="Write down what you did, in what order, and what happened. Don't trust your memory.",
+    agans_summary="Track chronological allocation, free, and dereference events (Ch. 8).",
 )
 
 CODE_MEM_002 = DetectionRule(
@@ -74,7 +77,8 @@ CODE_MEM_002 = DetectionRule(
     fix_strategy="Insert explicit bounds clamp if (idx >= len).",
     tags=["memory", "safety", "buffer-overflow", "bounds-check"],
     agans_rule="Rule 2: Make It Fail",
-    agans_summary="Stimulate boundary-value stress conditions (index >= length).",
+    agans_mantra="Do it again. Stimulate the failure consistently so you can study it under a microscope.",
+    agans_summary="Stimulate boundary-value stress conditions (index >= length) (Ch. 4).",
 )
 
 CODE_NUM_003 = DetectionRule(
@@ -90,7 +94,8 @@ CODE_NUM_003 = DetectionRule(
     fix_strategy="Synthesize zero-divisor guard before operation.",
     tags=["arithmetic", "safety", "division-by-zero"],
     agans_rule="Rule 7: Check the Plug",
-    agans_summary="Verify fundamental prerequisites: never assume a divisor is non-zero.",
+    agans_mantra="Question your assumptions. Always start with the simple, obvious basics first.",
+    agans_summary="Verify fundamental prerequisites: never assume a divisor is non-zero (Ch. 9).",
 )
 
 CODE_SEC_004 = DetectionRule(
@@ -105,7 +110,8 @@ CODE_SEC_004 = DetectionRule(
     fix_strategy="Replace raw string concat with parameterized API.",
     tags=["security", "taint", "injection", "xss", "sql-injection"],
     agans_rule="Rule 4: Divide and Conquer",
-    agans_summary="Slice data flow systematically from untrusted source to sink.",
+    agans_mantra="Narrow the search space. Cut the problem in half until the bug has nowhere to hide.",
+    agans_summary="Slice data flow systematically from untrusted source to sink (Ch. 6).",
 )
 
 CODE_CON_005 = DetectionRule(
@@ -121,7 +127,8 @@ CODE_CON_005 = DetectionRule(
     fix_strategy="Wrap critical section in mutex guard or atomic op.",
     tags=["concurrency", "race-condition", "thread-safety"],
     agans_rule="Rule 8: Get a Fresh View",
-    agans_summary="Combine lockset analysis and GNN to spot multi-thread blind spots.",
+    agans_mantra="Overcome tunnel vision. Ask for an outside perspective and cross-validate findings.",
+    agans_summary="Combine lockset analysis and GNN to spot multi-thread blind spots (Ch. 10).",
 )
 
 
@@ -140,7 +147,8 @@ CIRC_STA_001 = DetectionRule(
     fix_strategy="Insert pipeline register, resize driver, or buffer delay.",
     tags=["timing", "sta", "setup", "hold", "slack"],
     agans_rule="Rule 3: Quit Thinking and Look",
-    agans_summary="Observe actual waveform delay and prove Slack >= 0.0 ns (Rule 9).",
+    agans_mantra="Stop guessing and theorizing. Look at the actual signals, bytes, and telemetry.",
+    agans_summary="Observe actual waveform delay and prove Slack >= 0.0 ns under Rule 9 (Ch. 5).",
 )
 
 CIRC_CDC_002 = DetectionRule(
@@ -156,7 +164,8 @@ CIRC_CDC_002 = DetectionRule(
     fix_strategy="Instantiate 2-FF synchronizer cell or async Gray FIFO.",
     tags=["cdc", "clock-domain", "metastability", "synchronizer"],
     agans_rule="Rule 1: Understand the System",
-    agans_summary="Map asynchronous clock domains and enforce synchronizer contracts.",
+    agans_mantra="Read the manual. Know how the system is supposed to work before deciding it's broken.",
+    agans_summary="Map asynchronous clock domains and enforce synchronizer contracts (Ch. 3).",
 )
 
 CIRC_ERC_003 = DetectionRule(
@@ -172,7 +181,8 @@ CIRC_ERC_003 = DetectionRule(
     fix_strategy="Break combinational loop with clocked D-flip-flop.",
     tags=["erc", "feedback-loop", "combinational", "oscillation"],
     agans_rule="Rule 4: Divide and Conquer",
-    agans_summary="Isolate oscillating loop with Tarjan's SCC cycle decomposition.",
+    agans_mantra="Narrow the search space. Cut the problem in half until the bug has nowhere to hide.",
+    agans_summary="Isolate oscillating loop with Tarjan's SCC cycle decomposition (Ch. 6).",
 )
 
 CIRC_ERC_004 = DetectionRule(
@@ -188,7 +198,8 @@ CIRC_ERC_004 = DetectionRule(
     fix_strategy="Tie undriven net to default rail or multiplex drivers.",
     tags=["erc", "floating-net", "multi-driver", "x-propagation"],
     agans_rule="Rule 7: Check the Plug",
-    agans_summary="Verify power and driver pins are plugged in before timing analysis.",
+    agans_mantra="Question your assumptions. Always start with the simple, obvious basics first.",
+    agans_summary="Verify power and driver pins are plugged in before timing analysis (Ch. 9).",
 )
 
 CIRC_PWR_005 = DetectionRule(
@@ -204,7 +215,8 @@ CIRC_PWR_005 = DetectionRule(
     fix_strategy="Widen M3/M4 power straps and add decoupling caps.",
     tags=["power", "ir-drop", "latch-up", "spice", "analog"],
     agans_rule="Rule 3: Quit Thinking and Look",
-    agans_summary="Observe ground-truth nodal voltages and metal strap widths.",
+    agans_mantra="Stop guessing and theorizing. Look at the actual signals, bytes, and telemetry.",
+    agans_summary="Observe ground-truth nodal voltages and metal strap widths (Ch. 5).",
 )
 
 

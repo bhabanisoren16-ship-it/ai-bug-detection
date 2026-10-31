@@ -52,6 +52,11 @@ class AgansRuleInfo:
     circuit_application: str
     telemetry_hook: str
     badge_label: str
+    chapter_number: int = 1
+    book_title: str = "Debugging: The 9 Indispensable Rules for Finding Even the Most Elusive Software and Hardware Problems"
+    book_author: str = "David J. Agans"
+    book_remember_rules: List[str] = field(default_factory=list)
+    key_quote: str = ""
 
     def to_dict(self) -> dict:
         d = asdict(self)
@@ -65,6 +70,7 @@ AGANS_NINE_RULES: Dict[AgansRuleId, AgansRuleInfo] = {
     AgansRuleId.RULE_1_UNDERSTAND: AgansRuleInfo(
         rule_id=AgansRuleId.RULE_1_UNDERSTAND,
         rule_number=1,
+        chapter_number=3,
         title="Understand the System",
         mantra="Read the manual. Know how the system is supposed to work before deciding it's broken.",
         summary=(
@@ -81,11 +87,21 @@ AGANS_NINE_RULES: Dict[AgansRuleId, AgansRuleInfo] = {
         ),
         telemetry_hook="ast_parser / netlist_hypergraph_parser",
         badge_label="Rule 1: Understand the System",
+        book_remember_rules=[
+            "Read the manual. It'll tell you how things connect and prevent incorrect usage.",
+            "Read everything in depth. The critical detail is often buried deep in the specification.",
+            "Know the fundamentals. Chain saws are supposed to be loud; understand expected baseline behaviors.",
+            "Know the road map. Understand how subsystems communicate and how data flows.",
+            "Understand your tools. Know what your compilers, profilers, and analyzers actually do.",
+            "Look up the details. Even Einstein looked up phone numbers. Never trust faulty memory.",
+        ],
+        key_quote="Don't guess. Look it up. Pinouts of chips, parameters for functions, or even function names—look them up.",
     ),
 
     AgansRuleId.RULE_2_MAKE_IT_FAIL: AgansRuleInfo(
         rule_id=AgansRuleId.RULE_2_MAKE_IT_FAIL,
         rule_number=2,
+        chapter_number=4,
         title="Make It Fail",
         mantra="Do it again. Stimulate the failure consistently so you can study it under a microscope.",
         summary=(
@@ -102,11 +118,24 @@ AGANS_NINE_RULES: Dict[AgansRuleId, AgansRuleInfo] = {
         ),
         telemetry_hook="dynamic_analyzer (SBFL) / formal_checker (BMC)",
         badge_label="Rule 2: Make It Fail",
+        book_remember_rules=[
+            "Do it again. Do it again so you can look at it, focus on the cause, and tell if you fixed it.",
+            "Start at the beginning. Recreate the exact starting sequence and environment.",
+            "Stimulate the failure. Spray a hose on that leaky window.",
+            "Don't simulate the failure. Test the real failing unit, not a separate synthetic substitute.",
+            "Find the uncontrolled condition that makes it intermittent—shake it, rattle it, roll it.",
+            "Record everything and find the signature of intermittent bugs.",
+            "Don't trust statistics too much. Correlate failures with exact causal triggers.",
+            "Know that 'that' can happen. Even the ice cream flavor can matter.",
+            "Never throw away a debugging tool. Keep automated stress tests in the pipeline.",
+        ],
+        key_quote="It seems easy, but if you don't do it, debugging is hard. Do it again so you can look at it.",
     ),
 
     AgansRuleId.RULE_3_QUIT_THINKING_AND_LOOK: AgansRuleInfo(
         rule_id=AgansRuleId.RULE_3_QUIT_THINKING_AND_LOOK,
         rule_number=3,
+        chapter_number=5,
         title="Quit Thinking and Look",
         mantra="Stop guessing and theorizing. Look at the actual signals, bytes, and telemetry.",
         summary=(
@@ -123,11 +152,22 @@ AGANS_NINE_RULES: Dict[AgansRuleId, AgansRuleInfo] = {
         ),
         telemetry_hook="highlighter (Carets) / cross_probe (4-View Telemetry)",
         badge_label="Rule 3: Quit Thinking and Look",
+        book_remember_rules=[
+            "See the failure. The senior engineer saw the real failure; junior guys guessed and fixed what wasn't broken.",
+            "See the details. Don't stop when you hear a pump—go down and verify which pump.",
+            "Build instrumentation in. Provide diagnostic hooks, logging channels, and telemetry probes.",
+            "Add instrumentation on. Attach logic analyzers, oscilloscopes, and carets to inspect live state.",
+            "Don't be afraid to look into the black box. Step inside libraries and drivers when required.",
+            "Watch out for observer effect. Ensure instrumentation doesn't perturb timing or execution.",
+            "Guess only to focus the search. Use hypotheses to direct observation, not to conclude without seeing.",
+        ],
+        key_quote="You can think up thousands of possible reasons for a failure. You can see only the actual cause.",
     ),
 
     AgansRuleId.RULE_4_DIVIDE_AND_CONQUER: AgansRuleInfo(
         rule_id=AgansRuleId.RULE_4_DIVIDE_AND_CONQUER,
         rule_number=4,
+        chapter_number=6,
         title="Divide and Conquer",
         mantra="Narrow the search space. Cut the problem in half until the bug has nowhere to hide.",
         summary=(
@@ -144,11 +184,22 @@ AGANS_NINE_RULES: Dict[AgansRuleId, AgansRuleInfo] = {
         ),
         telemetry_hook="cfg_dfg_analyzer (Slicing) / gnn_fault_locator (COI)",
         badge_label="Rule 4: Divide and Conquer",
+        book_remember_rules=[
+            "Narrow the search with successive approximation. Binary search cuts 100 choices in 7 steps.",
+            "Get the range. If the target is outside bounds, widen your inspection range.",
+            "Determine which side of the bug you are on. If there's goo, the leak is upstream; if clean, downstream.",
+            "Use easy-to-spot test patterns. Start with clear data so anomalies stand out instantly.",
+            "Start with the bad. Start where it's broken and work backward to the cause.",
+            "Fix the bugs you know about. Bugs defend and hide each other—eliminate them as soon as found.",
+            "Fix the noise first. Clear interference and warnings that distract from the core fault.",
+        ],
+        key_quote="It's hard for a bug to keep hiding when its hiding place keeps getting cut in half.",
     ),
 
     AgansRuleId.RULE_5_CHANGE_ONE_THING: AgansRuleInfo(
         rule_id=AgansRuleId.RULE_5_CHANGE_ONE_THING,
         rule_number=5,
+        chapter_number=7,
         title="Change One Thing at a Time",
         mantra="Isolate each change. If you change two things at once, you will never know which one worked.",
         summary=(
@@ -165,11 +216,20 @@ AGANS_NINE_RULES: Dict[AgansRuleId, AgansRuleInfo] = {
         ),
         telemetry_hook="auto_remediation (Unified Diff) / circuit_remediation",
         badge_label="Rule 5: Change One Thing at a Time",
+        book_remember_rules=[
+            "Isolate the key factor. Use a sniper rifle, not a shotgun.",
+            "Grab the brass bar with both hands. Maintain predictability; remove changes that didn't work.",
+            "Change one test at a time. Keep all other variables fixed while altering test conditions.",
+            "Compare it with a good one. Differential debugging against working baselines isolates the difference.",
+            "Determine what you changed since the last time it worked (check git revision history).",
+        ],
+        key_quote="Remove the changes that didn't do what you expected. They probably did something you didn't expect.",
     ),
 
     AgansRuleId.RULE_6_KEEP_AUDIT_TRAIL: AgansRuleInfo(
         rule_id=AgansRuleId.RULE_6_KEEP_AUDIT_TRAIL,
         rule_number=6,
+        chapter_number=8,
         title="Keep an Audit Trail",
         mantra="Write down what you did, in what order, and what happened. Don't trust your memory.",
         summary=(
@@ -186,11 +246,20 @@ AGANS_NINE_RULES: Dict[AgansRuleId, AgansRuleInfo] = {
         ),
         telemetry_hook="causal_trace (Step 1->2->3) / SARIF v2.1.0 Exporter",
         badge_label="Rule 6: Keep an Audit Trail",
+        book_remember_rules=[
+            "Write down what you did, in what order, and what happened as a result.",
+            "Understand that any detail could be the important one (even the shirt color or timestamp).",
+            "Correlate events precisely. Record exact microsecond timestamps and clock cycle numbers.",
+            "Audit trails for design are also good for testing. Configuration control records what broke when.",
+            "Write it down! The shortest pencil is longer than the longest memory.",
+        ],
+        key_quote="The horror of that moment I shall never forget! You will, though, if you don't make a memorandum of it.",
     ),
 
     AgansRuleId.RULE_7_CHECK_THE_PLUG: AgansRuleInfo(
         rule_id=AgansRuleId.RULE_7_CHECK_THE_PLUG,
         rule_number=7,
+        chapter_number=9,
         title="Check the Plug",
         mantra="Question your assumptions. Always start with the simple, obvious basics first.",
         summary=(
@@ -207,11 +276,19 @@ AGANS_NINE_RULES: Dict[AgansRuleId, AgansRuleInfo] = {
         ),
         telemetry_hook="preflight_sanity_check / erc_cdc_sta (Floating Nets)",
         badge_label="Rule 7: Check the Plug",
+        book_remember_rules=[
+            "Question your assumptions. Are you running the right code? Are you out of gas? Is it plugged in?",
+            "Start at the beginning. Did you initialize memory properly? Did you turn it on?",
+            "Test the tool. Are you running the right compiler? Does the meter have a dead battery?",
+            "Obvious assumptions are often wrong. And to rub it in, assumption bugs are usually the easiest to fix.",
+        ],
+        key_quote="Obvious assumptions are often wrong. And to rub it in, assumption bugs are usually the easiest to fix.",
     ),
 
     AgansRuleId.RULE_8_FRESH_VIEW: AgansRuleInfo(
         rule_id=AgansRuleId.RULE_8_FRESH_VIEW,
         rule_number=8,
+        chapter_number=10,
         title="Get a Fresh View",
         mantra="Overcome tunnel vision. Ask for an outside perspective and cross-validate findings.",
         summary=(
@@ -228,11 +305,22 @@ AGANS_NINE_RULES: Dict[AgansRuleId, AgansRuleInfo] = {
         ),
         telemetry_hook="hybrid_priority_score (R_total Triangulation)",
         badge_label="Rule 8: Get a Fresh View",
+        book_remember_rules=[
+            "Ask for fresh insights. Even a rubber duck or fresh coworker helps you see what you missed.",
+            "Tap expertise. Consult vendors, manuals, and colleagues with specialized domain knowledge.",
+            "Listen to the voice of experience. Experienced engineers know where wires get pinched.",
+            "Know that help is all around you. Combine complementary tools and external checkers.",
+            "Don't be proud. Take pride in eliminating the bug, not in finding it all alone.",
+            "Report symptoms, not theories. Don't drag others into your biased rut.",
+            "Realize that you don't have to be sure. Mention that the pattern seemed unusual.",
+        ],
+        key_quote="Take pride in getting rid of bugs, not in getting rid of them by yourself.",
     ),
 
     AgansRuleId.RULE_9_NOT_FIXED_AINT_FIXED: AgansRuleInfo(
         rule_id=AgansRuleId.RULE_9_NOT_FIXED_AINT_FIXED,
         rule_number=9,
+        chapter_number=11,
         title="If You Didn't Fix It, It Ain't Fixed",
         mantra="Never assume a fix works just because the symptom disappeared. Prove the root cause is solved.",
         summary=(
@@ -249,6 +337,14 @@ AGANS_NINE_RULES: Dict[AgansRuleId, AgansRuleInfo] = {
         ),
         telemetry_hook="closed_loop_fix_verifier / sta_recalculator",
         badge_label="Rule 9: If You Didn't Fix It, It Ain't Fixed",
+        book_remember_rules=[
+            "Check that it's really fixed. Don't assume that it was the wires and send the car back out.",
+            "Check that it's really your fix that fixed it. Prove the specific patch resolved the failure.",
+            "Know that it never just goes away by itself. If it disappeared spontaneously, it will return.",
+            "Fix the cause, not just the symptom. Tear out the failing root cause before you burn another part.",
+            "Fix the process. Don't settle for cleaning up oil—fix the design and add automated guard tests.",
+        ],
+        key_quote="And now that you have all these techniques, there's no excuse for leaving it unfixed.",
     ),
 }
 
@@ -320,6 +416,41 @@ RULE_TO_AGANS_MAPPING: Dict[str, Dict[str, Any]] = {
         "rationale": (
             "Data races hide intermittently across threads. Rule 8 (Get a Fresh View) uses lockset analysis and GNN "
             "embeddings to spot concurrent access blind spots that single-threaded thinking misses."
+        ),
+    },
+    "CODE-ARG-006": {
+        "primary_rule": AgansRuleId.RULE_1_UNDERSTAND,
+        "contributing_rules": [
+            AgansRuleId.RULE_7_CHECK_THE_PLUG,
+            AgansRuleId.RULE_5_CHANGE_ONE_THING,
+            AgansRuleId.RULE_9_NOT_FIXED_AINT_FIXED,
+        ],
+        "rationale": (
+            "Rule 1 (Understand the System): Python evaluates default arguments once at function definition time. "
+            "Rule 7 (Check the Plug) ensures clean initialization inside the function body using 'None'."
+        ),
+    },
+    "CODE-CMP-007": {
+        "primary_rule": AgansRuleId.RULE_1_UNDERSTAND,
+        "contributing_rules": [
+            AgansRuleId.RULE_7_CHECK_THE_PLUG,
+            AgansRuleId.RULE_5_CHANGE_ONE_THING,
+            AgansRuleId.RULE_9_NOT_FIXED_AINT_FIXED,
+        ],
+        "rationale": (
+            "Rule 1 (Understand the System): PEP 8 dictates 'is None' for identity checks rather than '== None'. "
+            "Rule 5 (Change One Thing) performs minimal atomic operator substitution."
+        ),
+    },
+    "CODE-STYLE-009": {
+        "primary_rule": AgansRuleId.RULE_3_QUIT_THINKING_AND_LOOK,
+        "contributing_rules": [
+            AgansRuleId.RULE_7_CHECK_THE_PLUG,
+            AgansRuleId.RULE_5_CHANGE_ONE_THING,
+            AgansRuleId.RULE_9_NOT_FIXED_AINT_FIXED,
+        ],
+        "rationale": (
+            "Rule 3 (Quit Thinking and Look): Inspect actual AST comparison operators and verify fix under Rule 9."
         ),
     },
 

@@ -1263,3 +1263,91 @@ body.theme-cyberpunk .agans-section-text {
     overflow-x: auto;
   }
 }
+
+/* ── Agans Diagnostic Card Rule Banner ───────────────────────────────────── */
+.agans-rule-banner {
+  margin-top: 10px;
+  margin-bottom: 12px;
+  padding: 12px 14px;
+  background: #f0fdf4;
+  border: 1.5px solid #22c55e;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+body.theme-light .agans-rule-banner {
+  background: #f0fdf4;
+  border-color: #16a34a;
+}
+
+.agans-badge-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.agans-badge-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11.5px;
+  font-weight: 800;
+  color: #15803d;
+  background: #dcfce7;
+  padding: 3px 10px;
+  border-radius: 9999px;
+  border: 1px solid #86efac;
+}
+
+.agans-chapter-tag {
+  font-size: 11px;
+  font-weight: 700;
+  color: #475569;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.agans-mantra-text {
+  font-size: 12.5px;
+  font-weight: 700;
+  font-style: italic;
+  color: #166534;
+  line-height: 1.45;
+}
+
+.agans-guidance-text {
+  font-size: 12px;
+  font-weight: 600;
+  color: #0f172a;
+  line-height: 1.5;
+}
+
+.agans-ref-section.collapsed #agans-ref-body {
+  display: none !important;
+}
+
+.agans-remember-box {
+  margin-top: 8px;
+  padding: 10px 14px;
+  background: #f8fafc;
+  border-radius: 6px;
+  border: 1.5px solid #cbd5e1;
+}
+
+.agans-remember-box strong {
+  font-size: 11px;
+  color: #0f172a;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.agans-remember-box ul {
+  margin: 6px 0 0 16px;
+  padding: 0;
+  font-size: 11.5px;
+  color: #334155;
+  line-height: 1.5;
+}

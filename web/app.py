@@ -15,7 +15,6 @@ Routes:
 
 import os
 import sys
-import re
 import json
 import traceback
 from pathlib import Path
@@ -119,7 +118,7 @@ def _analyze_phase1_code(source_code: str, language: str) -> List[BugDiagnostic]
             if alloc_kw in stripped:
                 parts = stripped.split("=")
                 if len(parts) >= 2:
-                    var = parts[0].strip().split()[-1].lstrip("*")
+                    var = parts[0].strip()
                     allocated_vars[var] = line_num
 
         # Detect free
@@ -134,14 +133,9 @@ def _analyze_phase1_code(source_code: str, language: str) -> List[BugDiagnostic]
 
         # Check for use-after-free
         for freed_var, freed_line in list(freed_vars.items()):
-            code_no_comment = stripped.split("#")[0].split("//")[0].strip()
-            is_pointer_rebind = bool(re.match(rf"^(?:[\w\*]+\s+)?{re.escape(freed_var)}\s*=", code_no_comment))
-            is_free_call = any(kw in code_no_comment for kw in ["free(", "free_buf(", "delete ", "dealloc("])
-            if (code_no_comment
-                    and re.search(rf"\b{re.escape(freed_var)}\b", code_no_comment)
+            if (freed_var in stripped
                     and line_num > freed_line
-                    and not is_free_call
-                    and not is_pointer_rebind):
+                    and not any(kw in stripped for kw in ["free(", "free_buf(", "delete ", "="])):
                 # Guard check: check if null-guarded in current line or immediate block
                 is_guarded = any(
                     g in stripped or (line_idx > 0 and g in lines[line_idx - 1]) or (line_idx > 1 and g in lines[line_idx - 2])
@@ -219,7 +213,7 @@ def _analyze_phase1_code(source_code: str, language: str) -> List[BugDiagnostic]
                 target_line = "for i in range(length):"
                 diff_patch = (
                     f"- {target_line}\n"
-                    f"+ for i in range(length - 1):"
+                    f"+ for i in range(length - 1):  # Prevent off-by-one buffer overflow"
                 )
             elif "<= 10" in stripped:
                 diff_patch = (
@@ -253,11 +247,11 @@ def _analyze_phase1_code(source_code: str, language: str) -> List[BugDiagnostic]
             diagnostics.append(diag)
 
         # ── CODE-NUM-003: Division by Zero ────────────────────────────────
-        if "= 0" in stripped and "/" not in stripped and not stripped.startswith("#") and not stripped.startswith("//"):
+        if "= 0" in stripped and "/" not in stripped and not stripped.startswith("#"):
             parts = stripped.split("=")
             if len(parts) >= 2:
-                var_name = parts[0].strip().split()[-1].lstrip("*")
-                val = parts[1].strip().rstrip(";").strip()
+                var_name = parts[0].strip()
+                val = parts[1].strip().rstrip(";")
                 if val == "0":
                     divisor_zero_vars[var_name] = line_num
 

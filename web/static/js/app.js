@@ -9,7 +9,9 @@ document.addEventListener("DOMContentLoaded", () => {
     initLineNumbers();
     initSampleButtons();
     initCatalogToggle();
+    initAgansToggle();
     loadCatalogRules();
+    loadAgansRules();
 
     // Default sample load: Python defect sample
     loadSampleCode("python");
@@ -332,24 +334,47 @@ function renderCodeResults(data, sourceCode) {
     let html = "";
 
     highlights.forEach((h, idx) => {
-        const lineNum = h.line || 1;
+        const lineNum = h.line || (h.code_span ? h.code_span.start_line : 1);
+        const colNum = h.column || (h.code_span ? h.code_span.start_col : 1);
         const codeLine = lines[lineNum - 1] || "";
         const sevClass = (h.severity || "warning").toLowerCase();
 
-        // Causal trail HTML
+        // Agans Rule Info
+        const agansBadge = h.agans_badge || h.agans_rule || "Rule 3: Quit Thinking and Look";
+        const agansMantra = h.agans_mantra || (h.agans_protocol && h.agans_protocol.primary_info ? h.agans_protocol.primary_info.mantra : "");
+        const agansGuidance = h.agans_rationale || h.agans_summary || (h.agans_protocol ? h.agans_protocol.rationale : "");
+        const agansChapter = h.agans_chapter || (h.agans_protocol && h.agans_protocol.primary_info ? h.agans_protocol.primary_info.chapter_number : "");
+
+        const agansBannerHtml = agansBadge ? `
+            <div class="agans-rule-banner">
+                <div class="agans-badge-row">
+                    <span class="agans-badge-pill">📖 ${escapeHtml(agansBadge)}</span>
+                    <span class="agans-chapter-tag">${agansChapter ? `Book Chapter ${agansChapter}` : "David J. Agans Book Reference"}</span>
+                </div>
+                ${agansMantra ? `<div class="agans-mantra-text">"${escapeHtml(agansMantra)}"</div>` : ""}
+                ${agansGuidance ? `<div class="agans-guidance-text">💡 <strong>Agans Advice:</strong> ${escapeHtml(agansGuidance)}</div>` : ""}
+            </div>
+        ` : "";
+
+        // Causal trail HTML (Agans Rule 6: Keep an Audit Trail)
         let causalHtml = "";
-        if (h.causal_trail && h.causal_trail.length > 0) {
+        const trace = h.causal_trail || h.causal_trace || [];
+        if (trace.length > 0) {
             causalHtml = `
                 <div class="causal-trail">
-                    ${h.causal_trail.map(c => `<span class="causal-step">Step ${c.step}: ${escapeHtml(c.desc)}</span>`).join(" ➔ ")}
+                    <div style="font-size: 11px; font-weight: 700; color: #475569; margin-bottom: 4px;">
+                        <span>📋</span> Audit Trail (Agans Rule 6: Keep an Audit Trail):
+                    </div>
+                    ${trace.map(c => `<span class="causal-step">Step ${c.step || c.step_index}: ${escapeHtml(c.desc || c.label)}</span>`).join(" ➔ ")}
                 </div>
             `;
         }
 
-        // Patch Diff Box
+        // Patch Diff Box (Agans Rule 5: Change One Thing at a Time)
         let patchHtml = "";
-        if (h.patch_diff) {
-            const diffLines = h.patch_diff.split("\n").map(l => {
+        const diffText = h.patch_diff || (h.auto_remediation ? h.auto_remediation.unified_diff : "");
+        if (diffText) {
+            const diffLines = diffText.split("\n").map(l => {
                 if (l.startsWith("+")) return `<div class="diff-add">${escapeHtml(l)}</div>`;
                 if (l.startsWith("-")) return `<div class="diff-del">${escapeHtml(l)}</div>`;
                 return `<div>${escapeHtml(l)}</div>`;
@@ -358,15 +383,18 @@ function renderCodeResults(data, sourceCode) {
             patchHtml = `
                 <div class="diff-box">
                     <div class="diff-header">
-                        <div style="display: flex; align-items: center; gap: 6px;">
+                        <div style="display: flex; align-items: center; gap: 8px;">
                             <span>🛠️</span>
-                            <strong>Automated Fix Patch</strong>
+                            <strong>Automated Remediation</strong>
+                            <span class="badge" style="background: #e0f2fe; color: #0284c7; border: 1px solid #7dd3fc; font-size: 10px; padding: 2px 7px;">
+                                Rule 5: Change One Thing
+                            </span>
                         </div>
                         <button class="btn btn-secondary btn-sm btn-verify-fix"
                                 data-diagnostic-id="${h.diagnostic_id || idx}"
                                 data-rule-id="${h.rule_id}"
-                                data-patch="${encodeURIComponent(h.patch_diff)}">
-                            <span>⚡</span> Apply Fix &amp; Verify
+                                data-patch="${encodeURIComponent(diffText)}">
+                            <span>⚡</span> Apply Fix &amp; Verify (Rule 9)
                         </button>
                     </div>
                     <div class="diff-body">${diffLines}</div>
@@ -383,10 +411,11 @@ function renderCodeResults(data, sourceCode) {
                         <strong>${escapeHtml(h.category || "Bug")}</strong>
                         <span style="font-family: monospace; font-size: 11px; color: var(--text-dim);">${escapeHtml(h.rule_id)}</span>
                     </div>
-                    <span class="diag-location">Line ${lineNum}:${h.column || 1}</span>
+                    <span class="diag-location">Line ${lineNum}:${colNum}</span>
                 </div>
 
                 <div class="diag-message">${escapeHtml(h.message)}</div>
+                ${agansBannerHtml}
                 ${causalHtml}
 
                 <div class="code-overlay-block">
@@ -496,6 +525,40 @@ function renderCircuitResults(data) {
         const sevClass = (h.severity || "warning").toLowerCase();
         const views = h.cross_probe_views || {};
 
+        // Agans Rule Info for Circuit
+        const agansBadge = h.agans_badge || h.agans_rule || (
+            h.rule_id === "CIRC-STA-001" ? "Rule 3: Quit Thinking and Look" :
+            h.rule_id === "CIRC-ERC-004" ? "Rule 7: Check the Plug" :
+            h.rule_id === "CIRC-CDC-002" ? "Rule 1: Understand the System" :
+            "Rule 4: Divide and Conquer"
+        );
+        const agansMantra = h.agans_mantra || (
+            h.rule_id === "CIRC-STA-001" ? "Stop guessing and theorizing. Look at the actual signals, bytes, and telemetry." :
+            h.rule_id === "CIRC-ERC-004" ? "Question your assumptions. Always start with the simple, obvious basics first." :
+            "Understand the system and isolate components before guessing causes."
+        );
+        const agansGuidance = h.agans_rationale || h.agans_summary || (
+            h.rule_id === "CIRC-STA-001" ? "Observe actual picosecond waveform delays under Rule 3 and mathematically prove Slack >= 0.0 ns under Rule 9." :
+            h.rule_id === "CIRC-ERC-004" ? "Verify that drivers and power supplies are plugged in before analyzing complex signal transitions." :
+            "Enforce strict asynchronous clock-domain crossing and synchronization contracts."
+        );
+        const agansChapter = h.agans_chapter || (
+            h.rule_id === "CIRC-STA-001" ? 5 :
+            h.rule_id === "CIRC-ERC-004" ? 9 :
+            h.rule_id === "CIRC-CDC-002" ? 3 : 6
+        );
+
+        const agansBannerHtml = `
+            <div class="agans-rule-banner">
+                <div class="agans-badge-row">
+                    <span class="agans-badge-pill">📖 ${escapeHtml(agansBadge)}</span>
+                    <span class="agans-chapter-tag">${agansChapter ? `Book Chapter ${agansChapter}` : "David J. Agans Book Reference"}</span>
+                </div>
+                ${agansMantra ? `<div class="agans-mantra-text">"${escapeHtml(agansMantra)}"</div>` : ""}
+                ${agansGuidance ? `<div class="agans-guidance-text">💡 <strong>Agans Advice:</strong> ${escapeHtml(agansGuidance)}</div>` : ""}
+            </div>
+        `;
+
         html += `
             <div class="diag-card ${sevClass}">
                 <div class="diag-header">
@@ -508,11 +571,12 @@ function renderCircuitResults(data) {
                 </div>
 
                 <div class="diag-message">${escapeHtml(h.message)}</div>
+                ${agansBannerHtml}
 
                 <!-- 4-View Synchronized Probe -->
                 <div class="probe-card">
                     <div style="font-size: 11px; font-weight: 700; color: #475569; margin-bottom: 8px;">
-                        🔬 4-View Cross-Probe Coordinates:
+                        🔬 4-View Cross-Probe Coordinates (Agans Rule 3: Quit Thinking and Look):
                     </div>
                     <div class="probe-grid">
                         <div class="probe-item">
@@ -535,7 +599,7 @@ function renderCircuitResults(data) {
 
                     ${h.remediation_advice ? `
                         <div style="margin-top: 10px; padding: 8px 12px; background: #ecfccb; border: 1px solid #84cc16; border-radius: 6px; font-size: 11px; color: #1a2e05;">
-                            <strong>Remediation:</strong> ${escapeHtml(h.remediation_advice)}
+                            <strong>Remediation (Agans Rule 5 &amp; 9):</strong> ${escapeHtml(h.remediation_advice)}
                         </div>
                     ` : ""}
                 </div>
@@ -578,6 +642,7 @@ async function loadCatalogRules() {
             const predicate = r.detection_predicate || r.formal_detection_predicate || "";
             const fix = r.fix_strategy || r.automated_fix_strategy || "";
             const agansRule = r.agans_rule || "";
+            const agansMantra = r.agans_mantra || "";
             const agansSummary = r.agans_summary || "";
             const phaseLabel = phase === "PHASE_1_CODE" ? "Phase 1: Code" : "Phase 2: Circuit";
             const phaseClass = phase === "PHASE_1_CODE" ? "info" : "purple";
@@ -591,7 +656,8 @@ async function loadCatalogRules() {
                     <td class="col-fix"><div class="fix-box">${escapeHtml(fix)}</div></td>
                     <td class="col-agans">
                         ${agansRule ? `<div class="agans-badge"><span>📖</span> ${escapeHtml(agansRule)}</div>` : ""}
-                        ${agansSummary ? `<div class="agans-subtext">${escapeHtml(agansSummary)}</div>` : ""}
+                        ${agansMantra ? `<div style="font-size: 11px; font-style: italic; color: #166534; font-weight: 700; margin-top: 4px;">"${escapeHtml(agansMantra)}"</div>` : ""}
+                        ${agansSummary ? `<div class="agans-subtext" style="margin-top: 2px;">${escapeHtml(agansSummary)}</div>` : ""}
                     </td>
                 </tr>
             `;
@@ -602,7 +668,24 @@ async function loadCatalogRules() {
     }
 }
 
-// ── David J. Agans' 9 Rules Grid ─────────────────────────────────────────────
+// ── David J. Agans' 9 Rules Grid & Toggle ────────────────────────────────────
+function initAgansToggle() {
+    const section = document.getElementById("agans-ref-section");
+    const header = document.getElementById("agans-ref-header");
+    const body = document.getElementById("agans-ref-body");
+    const icon = document.querySelector(".agans-toggle-icon");
+    if (!section || !header || !body) return;
+
+    header.addEventListener("click", () => {
+        const isCollapsed = body.style.display === "none";
+        body.style.display = isCollapsed ? "block" : "none";
+        section.classList.toggle("collapsed", !isCollapsed);
+        if (icon) {
+            icon.textContent = isCollapsed ? "▲" : "▼";
+        }
+    });
+}
+
 async function loadAgansRules() {
     const grid = document.getElementById("agans-rules-grid");
     if (!grid) return;
@@ -614,16 +697,33 @@ async function loadAgansRules() {
 
         let html = "";
         rules.forEach(r => {
+            const rememberList = (r.book_remember_rules || []).map(b => `<li>${escapeHtml(b)}</li>`).join("");
+
             html += `
                 <div class="agans-card">
                     <div class="agans-card-header">
-                        <span class="agans-rule-number">RULE ${r.rule_number}</span>
+                        <span class="agans-rule-number">RULE ${r.rule_number} · CH. ${r.chapter_number || r.rule_number + 2}</span>
                         <span style="font-size: 11px; color: var(--color-cobalt); font-weight: 700; font-family: var(--font-mono);">${escapeHtml(r.telemetry_hook)}</span>
                     </div>
                     <div class="agans-card-title">${escapeHtml(r.title)}</div>
                     <div class="agans-mantra">"${escapeHtml(r.mantra)}"</div>
                     <p style="font-size: 12px; color: var(--text-muted); line-height: 1.5;">${escapeHtml(r.summary)}</p>
                     
+                    ${r.key_quote ? `
+                        <div style="font-size: 11.5px; font-style: italic; color: #475569; border-left: 2px solid #94a3b8; padding-left: 8px; margin: 4px 0;">
+                            "${escapeHtml(r.key_quote)}"
+                        </div>
+                    ` : ""}
+
+                    ${rememberList ? `
+                        <div class="agans-remember-box">
+                            <strong>Book Rules to Remember (Ch. ${r.chapter_number || r.rule_number + 2}):</strong>
+                            <ul>
+                                ${rememberList}
+                            </ul>
+                        </div>
+                    ` : ""}
+
                     <div class="agans-section-block">
                         <div class="agans-section-label code-label">
                             <span>💻</span> Software Code Implementation:
