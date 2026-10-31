@@ -7,7 +7,7 @@
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
     <title>AI Bug Detection &amp; Highlighting System</title>
-    <link rel="stylesheet" href="/static/css/style.css?v=12.0">
+    <link rel="stylesheet" href="/static/css/style.css?v=13.0">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -37,16 +37,13 @@
         </div>
     </header>
 
-    <!-- Navigation Tabs (Core Problem Statement & Separate Rules Section) -->
+    <!-- Navigation Tabs (Core Problem Statement) -->
     <nav class="nav-tabs">
         <button class="tab-btn active" data-tab="tab-phase1">
             <span class="tab-icon">💻</span> Phase 1: Software Code Debugging
         </button>
         <button class="tab-btn" data-tab="tab-phase2">
             <span class="tab-icon">🔌</span> Phase 2: Hardware Netlist Debugging
-        </button>
-        <button class="tab-btn" data-tab="tab-rules" id="tab-btn-rules">
-            <span class="tab-icon">📖</span> Rules Catalog &amp; Agans' 9 Rules
         </button>
     </nav>
 
@@ -202,81 +199,91 @@
             </div>
         </section>
 
-
-        <!-- ================= SEPARATE SECTION: RULES & STANDARDS ================= -->
-        <section id="tab-rules" class="tab-panel">
-            <!-- Hero Card -->
-            <div class="panel-card" style="margin-bottom: 20px;">
-                <div class="panel-header">
-                    <div class="panel-title">
-                        <span>📖</span> Production Detection Rules &amp; David J. Agans' 9 Indispensable Rules
-                    </div>
-                    <span class="pill-badge" style="background: #e0f2fe; color: #0284c7; border-color: #7dd3fc;">10 Production Rules · 9 Agans Maxims</span>
-                </div>
-                <p style="padding: 14px 20px; margin: 0; font-size: 13px; color: var(--text-dim); line-height: 1.6;">
-                    Comprehensive reference catalog bridging software source code ASTs, dynamic test execution, and hardware circuit netlists.
-                    Includes mathematical predicates, automated fix diff strategies, and foundational debugging principles from David J. Agans' book.
-                </p>
-            </div>
-
-            <!-- 10 Production Rules Catalog Table -->
-            <section class="catalog-section" style="margin-bottom: 24px;">
-                <div class="catalog-header">
-                    <div style="display: flex; align-items: center; gap: 10px;">
-                        <span style="font-size: 16px;">📋</span>
-                        <strong>Production Detection Rule &amp; Highlight Signature Catalog</strong>
-                        <span class="pill-badge">10 Rules Loaded</span>
-                    </div>
-                    <span class="toggle-icon" style="color: var(--text-dim);">▲</span>
-                </div>
-                <div id="catalog-body">
-                    <table class="catalog-table">
-                        <thead>
-                            <tr>
-                                <th>Rule ID</th>
-                                <th>Phase</th>
-                                <th>Bug Category</th>
-                                <th>Formal Detection Predicate</th>
-                                <th>Automated Fix Strategy</th>
-                                <th>David J. Agans Reference</th>
-                            </tr>
-                        </thead>
-                        <tbody id="catalog-tbody">
-                            <!-- Populated by app.js -->
-                        </tbody>
-                    </table>
-                </div>
-            </section>
-
-            <!-- Agans 9 Indispensable Rules Book Reference -->
-            <section class="catalog-section agans-ref-section" id="agans-ref-section">
-                <div class="catalog-header" id="agans-ref-header">
-                    <div style="display: flex; align-items: center; gap: 10px;">
-                        <span style="font-size: 16px;">📚</span>
-                        <strong>David J. Agans: The 9 Indispensable Rules for Finding Even the Most Elusive Problems (Book Reference)</strong>
-                        <span class="pill-badge" style="background: #e0f2fe; color: #0284c7; border-color: #7dd3fc;">9 Rules Suitable for Framing</span>
-                    </div>
-                    <span class="toggle-icon agans-toggle-icon" style="color: var(--text-dim);">▲</span>
-                </div>
-                <div id="agans-ref-body" style="padding: 24px 20px; background: var(--bg-card); display: block;">
-                    <div class="agans-hero-card">
-                        <div>
-                            <div class="agans-hero-title">David J. Agans' 9 Indispensable Debugging Rules</div>
-                            <div class="agans-hero-subtitle">
-                                Reference: <em>Debugging: The 9 Indispensable Rules for Finding Even the Most Elusive Software and Hardware Problems</em> (David J. Agans, AMACOM).
-                                Universal principles bridging software source code ASTs, dynamic test execution, and electronic circuit netlists.
-                            </div>
-                        </div>
-                    </div>
-                    <div id="agans-rules-grid" class="agans-grid">
-                        <!-- Populated by app.js loadAgansRules() -->
-                    </div>
-                </div>
-            </section>
-        </section>
-
     </main>
 
-    <script src="/static/js/app.js?v=12.0"></script>
+    <!-- ================= RULES MODAL (ACCESSED UNDER ICON 📖) ================= -->
+    <div id="rules-modal" class="modal-backdrop" style="display: none;">
+        <div class="modal-dialog-xl">
+            <div class="modal-header">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <span style="font-size: 22px;">📖</span>
+                    <div>
+                        <div class="modal-title">Production Detection Rules &amp; David J. Agans' 9 Indispensable Rules</div>
+                        <div class="modal-subtitle">10 Formal Production Rules · 9 Agans Maxims Suitable for Framing</div>
+                    </div>
+                </div>
+                <button id="btn-close-rules-modal" class="modal-close-btn" title="Close (Esc)">✕</button>
+            </div>
+            <div class="modal-body">
+                <!-- Info Banner -->
+                <div class="panel-card" style="margin-bottom: 20px;">
+                    <p style="padding: 14px 20px; margin: 0; font-size: 13px; color: var(--text-dim); line-height: 1.6;">
+                        Comprehensive engineering reference catalog bridging software source code ASTs, dynamic test execution, and hardware circuit netlists.
+                        Includes mathematical predicates, automated fix diff strategies, and foundational debugging principles from David J. Agans' book.
+                    </p>
+                </div>
+
+                <!-- 10 Production Rules Catalog Table -->
+                <section class="catalog-section" style="margin-bottom: 24px;">
+                    <div class="catalog-header">
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <span style="font-size: 16px;">📋</span>
+                            <strong>Production Detection Rule &amp; Highlight Signature Catalog</strong>
+                            <span class="pill-badge">10 Rules Loaded</span>
+                        </div>
+                        <span class="toggle-icon" style="color: var(--text-dim);">▲</span>
+                    </div>
+                    <div id="catalog-body">
+                        <table class="catalog-table">
+                            <thead>
+                                <tr>
+                                    <th>Rule ID</th>
+                                    <th>Phase</th>
+                                    <th>Bug Category</th>
+                                    <th>Formal Detection Predicate</th>
+                                    <th>Automated Fix Strategy</th>
+                                    <th>David J. Agans Reference</th>
+                                </tr>
+                            </thead>
+                            <tbody id="catalog-tbody">
+                                <!-- Populated by app.js -->
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- Agans 9 Indispensable Rules Book Reference -->
+                <section class="catalog-section agans-ref-section" id="agans-ref-section">
+                    <div class="catalog-header" id="agans-ref-header">
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <span style="font-size: 16px;">📚</span>
+                            <strong>David J. Agans: The 9 Indispensable Rules for Finding Even the Most Elusive Problems (Book Reference)</strong>
+                            <span class="pill-badge" style="background: #e0f2fe; color: #0284c7; border-color: #7dd3fc;">9 Rules Suitable for Framing</span>
+                        </div>
+                        <span class="toggle-icon agans-toggle-icon" style="color: var(--text-dim);">▲</span>
+                    </div>
+                    <div id="agans-ref-body" style="padding: 24px 20px; background: var(--bg-card); display: block;">
+                        <div class="agans-hero-card">
+                            <div>
+                                <div class="agans-hero-title">David J. Agans' 9 Indispensable Debugging Rules</div>
+                                <div class="agans-hero-subtitle">
+                                    Reference: <em>Debugging: The 9 Indispensable Rules for Finding Even the Most Elusive Software and Hardware Problems</em> (David J. Agans, AMACOM).
+                                    Universal principles bridging software source code ASTs, dynamic test execution, and electronic circuit netlists.
+                                </div>
+                            </div>
+                        </div>
+                        <div id="agans-rules-grid" class="agans-grid">
+                            <!-- Populated by app.js loadAgansRules() -->
+                        </div>
+                    </div>
+                </section>
+            </div>
+            <div class="modal-footer">
+                <button id="btn-footer-close-rules" class="btn btn-secondary btn-sm">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/js/app.js?v=13.0"></script>
 </body>
 </html>

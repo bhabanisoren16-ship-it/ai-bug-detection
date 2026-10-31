@@ -10,24 +10,52 @@ document.addEventListener("DOMContentLoaded", () => {
     initSampleButtons();
     initCatalogToggle();
     initAgansToggle();
+    initRulesModal();
     loadCatalogRules();
     loadAgansRules();
-
-    const btnHeaderRules = document.getElementById("btn-header-rules");
-    if (btnHeaderRules) {
-        btnHeaderRules.addEventListener("click", () => {
-            const tabBtnRules = document.getElementById("tab-btn-rules");
-            if (tabBtnRules) {
-                tabBtnRules.click();
-                window.scrollTo({ top: 0, behavior: "smooth" });
-            }
-        });
-    }
 
     // Default sample load: Python defect sample
     loadSampleCode("python");
     loadSampleNetlist();
 });
+
+// ── Rules Modal Controller (Accessed Under 📖 Header Icon) ───────────────────
+function initRulesModal() {
+    const modal = document.getElementById("rules-modal");
+    const btnOpen = document.getElementById("btn-header-rules");
+    const btnClose = document.getElementById("btn-close-rules-modal");
+    const btnFooterClose = document.getElementById("btn-footer-close-rules");
+    if (!modal) return;
+
+    function openModal() {
+        modal.style.display = "flex";
+        document.body.style.overflow = "hidden";
+    }
+
+    function closeModal() {
+        modal.style.display = "none";
+        document.body.style.overflow = "";
+    }
+
+    if (btnOpen) btnOpen.addEventListener("click", openModal);
+    if (btnClose) btnClose.addEventListener("click", closeModal);
+    if (btnFooterClose) btnFooterClose.addEventListener("click", closeModal);
+
+    modal.addEventListener("click", (e) => {
+        if (e.target === modal) {
+            closeModal();
+        }
+    });
+
+    document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape" && modal.style.display === "flex") {
+            closeModal();
+        }
+    });
+
+    window.openRulesModal = openModal;
+    window.closeRulesModal = closeModal;
+}
 
 // ── Card Agans Rule Toggle ───────────────────────────────────────────────────
 function toggleCardRule(pillElement) {
