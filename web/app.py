@@ -125,10 +125,36 @@ google_rate_limiter = GoogleDefenseRateLimiter(limit=240, window_seconds=60.0)
 def enforce_google_defense_policies():
     """
     Google BeyondCorp Zero-Trust API Guard:
-    1. Null byte / path injection defense
-    2. Rate limiting / Anti-DDoS throttle
-    3. Content-Type verification for JSON endpoints
+    1. Active Google Crawler & Bot Access Lockout
+    2. Null byte / path injection defense
+    3. Rate limiting / Anti-DDoS throttle
+    4. Content-Type verification for JSON endpoints
     """
+    # 0. Active Google Access Lockout: forbid Google crawlers, bots, and services
+    user_agent = request.headers.get("User-Agent", "").lower()
+    google_ua_signatures = [
+        "googlebot",
+        "google-inspectiontool",
+        "googleother",
+        "google-extended",
+        "mediapartners-google",
+        "adsbot-google",
+        "feedfetcher-google",
+        "google-read-aloud",
+        "google-site-verification",
+        "appengine-google",
+    ]
+    if any(sig in user_agent for sig in google_ua_signatures) or any(k.lower().startswith("x-goog-") for k in request.headers.keys()):
+        return jsonify({
+            "error": {
+                "code": 403,
+                "message": "Access Denied: Google crawlers, automated bots, and Google services are forbidden from accessing this website.",
+                "status": "PERMISSION_DENIED",
+            },
+            "status_code": 403,
+            "shield_status": "GOOGLE_ACCESS_FORBIDDEN",
+        }), 403
+
     # 1. Null byte injection check
     path_raw = request.environ.get("RAW_URI", request.path)
     if "\x00" in path_raw or (request.query_string and b"\x00" in request.query_string):
@@ -190,6 +216,9 @@ def apply_security_defence_headers(response):
     response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
     response.headers["Pragma"] = "no-cache"
     response.headers["Expires"] = "0"
+
+    # Universal Anti-Search-Engine & Anti-Google Indexing Tag
+    response.headers["X-Robots-Tag"] = "noindex, nofollow, noarchive, nosnippet, noimageindex, notranslate"
 
     # Google Server Banner masking
     response.headers["Server"] = "gws"
@@ -1239,8 +1268,26 @@ def _analyze_phase2_circuit(netlist: Dict[str, Any]) -> List[BugDiagnostic]:
 
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-#  Route: Dashboard
+#  Route: Robots.txt & Dashboard
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+@app.route("/robots.txt")
+def robots_txt():
+    """Explicitly forbid Google and all crawlers from accessing or indexing the website."""
+    content = (
+        "User-agent: Googlebot\nDisallow: /\n\n"
+        "User-agent: Googlebot-Image\nDisallow: /\n\n"
+        "User-agent: Googlebot-News\nDisallow: /\n\n"
+        "User-agent: Googlebot-Video\nDisallow: /\n\n"
+        "User-agent: Mediapartners-Google\nDisallow: /\n\n"
+        "User-agent: AdsBot-Google\nDisallow: /\n\n"
+        "User-agent: Google-InspectionTool\nDisallow: /\n\n"
+        "User-agent: GoogleOther\nDisallow: /\n\n"
+        "User-agent: Google-Extended\nDisallow: /\n\n"
+        "User-agent: *\nDisallow: /\n"
+    )
+    return content, 200, {"Content-Type": "text/plain; charset=utf-8"}
+
 
 @app.route("/")
 def index():

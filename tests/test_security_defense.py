@@ -211,6 +211,41 @@ class TestSecurityAndDefenseCapabilities(unittest.TestCase):
         self.assertIn("Google BeyondCorp", profile["architecture"])
         self.assertEqual(profile["zero_trust_status"], "VERIFIED_SECURE")
 
+    def test_google_access_blocked(self):
+        """Verify Google crawlers and bots are strictly blocked with HTTP 403 Forbidden."""
+        # 1. Googlebot
+        res = self.client.get("/", headers={"User-Agent": "Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)"})
+        self.assertEqual(res.status_code, 403)
+        self.assertEqual(res.json["shield_status"], "GOOGLE_ACCESS_FORBIDDEN")
+
+        # 2. Google-InspectionTool
+        res = self.client.get("/api/rules", headers={"User-Agent": "Mozilla/5.0 (compatible; Google-InspectionTool/1.0;)"})
+        self.assertEqual(res.status_code, 403)
+
+        # 3. Google header signature
+        res = self.client.get("/", headers={"User-Agent": "NormalBrowser/1.0", "X-Goog-Channel-Token": "secret"})
+        self.assertEqual(res.status_code, 403)
+
+        # 4. Standard browser passes through normally
+        res_ok = self.client.get("/", headers={"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"})
+        self.assertEqual(res_ok.status_code, 200)
+
+    def test_robots_txt_disallows_google(self):
+        """Verify robots.txt explicitly disallows Googlebot and search indexers."""
+        res = self.client.get("/robots.txt")
+        self.assertEqual(res.status_code, 200)
+        self.assertIn("User-agent: Googlebot", res.data.decode("utf-8"))
+        self.assertIn("Disallow: /", res.data.decode("utf-8"))
+
+    def test_x_robots_tag_anti_indexing_header(self):
+        """Verify X-Robots-Tag header prevents Google indexing and caching."""
+        res = self.client.get("/")
+        self.assertEqual(res.status_code, 200)
+        robots_tag = res.headers.get("X-Robots-Tag", "")
+        self.assertIn("noindex", robots_tag)
+        self.assertIn("nofollow", robots_tag)
+        self.assertIn("noarchive", robots_tag)
+
 
 if __name__ == "__main__":
     unittest.main()
