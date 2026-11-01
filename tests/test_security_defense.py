@@ -98,7 +98,7 @@ class TestSecurityAndDefenseCapabilities(unittest.TestCase):
         """CODE-SEC-009: High-entropy secret credential in source code should be flagged."""
         code = (
             "import requests\n"
-            "API_KEY = 'sk_live_98472948729384729384729'\n"
+            "API_KEY = 'mock_secret_vault_token_48729384729384729'\n"
             "r = requests.get('https://api.example.com', headers={'Auth': API_KEY})\n"
         )
         diags = _analyze_phase1_code(code, "python")

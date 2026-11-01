@@ -265,6 +265,14 @@ def apply_security_defence_headers(response):
     return response
 
 
+def _sanitize_error_msg(exc: Exception) -> str:
+    """Scrub local filesystem paths and environment details from public error responses."""
+    msg = str(exc)
+    msg = re.sub(r'[a-zA-Z]:\\[^"\'\s,)]+', '<redacted_path>', msg)
+    msg = re.sub(r'/(?:home|Users|usr|etc|var|tmp)/[^"\'\s,)]+', '<redacted_path>', msg)
+    return msg
+
+
 @app.errorhandler(413)
 def request_entity_too_large(error):
     """Defensive handler against large payload DoS attacks."""
@@ -1364,7 +1372,7 @@ def analyze_code():
         raise
     except Exception as exc:
         traceback.print_exc()
-        return jsonify({"error": str(exc)}), 500
+        return jsonify({"error": _sanitize_error_msg(exc)}), 500
 
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -1431,7 +1439,7 @@ def analyze_circuit():
         raise
     except Exception as exc:
         traceback.print_exc()
-        return jsonify({"error": str(exc)}), 500
+        return jsonify({"error": _sanitize_error_msg(exc)}), 500
 
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -1490,7 +1498,7 @@ def analyze_file():
         raise
     except Exception as exc:
         traceback.print_exc()
-        return jsonify({"error": str(exc)}), 500
+        return jsonify({"error": _sanitize_error_msg(exc)}), 500
 
 
 def _detect_language(filename: str, content: str) -> str:
@@ -1639,7 +1647,7 @@ def verify_fix():
 
     except Exception as exc:
         traceback.print_exc()
-        return jsonify({"error": str(exc)}), 500
+        return jsonify({"error": _sanitize_error_msg(exc)}), 500
 
 
 @app.route("/api/autofix-all", methods=["POST"])
@@ -1698,7 +1706,7 @@ def autofix_all():
 
     except Exception as exc:
         traceback.print_exc()
-        return jsonify({"error": str(exc)}), 500
+        return jsonify({"error": _sanitize_error_msg(exc)}), 500
 
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -1730,7 +1738,7 @@ def check_plug():
 
     except Exception as exc:
         traceback.print_exc()
-        return jsonify({"error": str(exc)}), 500
+        return jsonify({"error": _sanitize_error_msg(exc)}), 500
 
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -1838,7 +1846,7 @@ def export_sarif():
 
     except Exception as exc:
         traceback.print_exc()
-        return jsonify({"error": str(exc)}), 500
+        return jsonify({"error": _sanitize_error_msg(exc)}), 500
 
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
