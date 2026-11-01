@@ -132,12 +132,43 @@ function initLineNumbers() {
             numbers += i + "\n";
         }
         gutter.textContent = numbers;
+
+        // Auto-widen gutter if lines >= 1000
+        if (lines >= 1000) {
+            gutter.style.width = "64px";
+            gutter.style.minWidth = "64px";
+        } else {
+            gutter.style.width = "48px";
+            gutter.style.minWidth = "48px";
+        }
     }
 
     function setupEditor(editor, gutter) {
         if (!editor) return;
 
-        // Smooth tab key indentation and caret management (prevents focus loss / caret jump)
+        // Clicking wrapper outside editor transfers focus directly to editor
+        const wrapper = editor.closest(".editor-wrapper");
+        if (wrapper) {
+            wrapper.addEventListener("click", (e) => {
+                if (e.target === wrapper) {
+                    editor.focus();
+                }
+            });
+        }
+
+        // Clicking gutter line number navigates cursor directly to that line
+        if (gutter) {
+            gutter.addEventListener("click", (e) => {
+                const rect = gutter.getBoundingClientRect();
+                const offsetY = e.clientY - rect.top + editor.scrollTop;
+                const padding = 14;
+                const lineHeight = 22;
+                const targetLine = Math.max(1, Math.floor((offsetY - padding) / lineHeight) + 1);
+                jumpToEditorLine(editor.id, targetLine, 1);
+            });
+        }
+
+        // Smart keyboard caret handling: Tab (indent), Shift+Tab (outdent), Enter (auto-indent)
         editor.addEventListener("keydown", function(e) {
             if (e.key === "Tab") {
                 e.preventDefault();
@@ -170,10 +201,10 @@ function initLineNumbers() {
                     this.selectionEnd = Math.max(lineStart, end - removedChars);
                 } else {
                     if (start === end) {
-                        // Single cursor: Insert 4 spaces at caret position
-                        const indent = "    ";
-                        this.value = value.substring(0, start) + indent + value.substring(end);
-                        this.selectionStart = this.selectionEnd = start + 4;
+                        // Single cursor: Insert 4 spaces using execCommand (preserves native undo/redo stack)
+                        if (!document.execCommand("insertText", false, "    ")) {
+                            this.setRangeText("    ", start, end, "end");
+                        }
                     } else {
                         // Range selection: Indent all selected lines by 4 spaces
                         const lineStart = value.lastIndexOf("\n", start - 1) + 1;
@@ -190,6 +221,29 @@ function initLineNumbers() {
                 }
 
                 if (gutter) updateGutter(editor, gutter);
+                syncScroll();
+                return;
+            }
+
+            // Enter key: Preserve leading whitespace/indentation of previous line
+            if (e.key === "Enter") {
+                const start = this.selectionStart;
+                const value = this.value;
+                const lineStart = value.lastIndexOf("\n", start - 1) + 1;
+                const currentLine = value.substring(lineStart, start);
+                const indentMatch = currentLine.match(/^[ \t]+/);
+                if (indentMatch) {
+                    e.preventDefault();
+                    const indent = indentMatch[0];
+                    const extra = currentLine.trimEnd().endsWith(":") || currentLine.trimEnd().endsWith("{") ? "    " : "";
+                    const insert = "\n" + indent + extra;
+                    if (!document.execCommand("insertText", false, insert)) {
+                        this.setRangeText(insert, start, start, "end");
+                    }
+                    if (gutter) updateGutter(editor, gutter);
+                    syncScroll();
+                    return;
+                }
             }
         });
 
@@ -198,7 +252,7 @@ function initLineNumbers() {
             if (gutter) gutter.scrollTop = editor.scrollTop;
         };
 
-        editor.addEventListener("scroll", syncScroll);
+        editor.addEventListener("scroll", syncScroll, { passive: true });
         editor.addEventListener("keyup", syncScroll);
         editor.addEventListener("click", syncScroll);
         editor.addEventListener("input", () => {
