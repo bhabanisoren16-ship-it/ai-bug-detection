@@ -460,6 +460,8 @@ body.theme-cyberpunk .badge-security {
   background: #ffffff;
   font-family: var(--font-mono);
   border-bottom: 1px solid var(--border-color);
+  cursor: text;
+  position: relative;
 }
 
 .line-numbers {
@@ -472,7 +474,12 @@ body.theme-cyberpunk .badge-security {
   padding: 14px 8px;
   text-align: right;
   user-select: none;
+  -webkit-user-select: none;
   border-right: 1px solid var(--border-color);
+  cursor: default;
+  pointer-events: none;
+  overflow: hidden;
+  box-sizing: border-box;
 }
 
 .code-textarea {
@@ -487,8 +494,20 @@ body.theme-cyberpunk .badge-security {
   outline: none;
   resize: none;
   white-space: pre;
-  overflow-y: auto;
+  overflow: auto;
+  box-sizing: border-box;
   tab-size: 4;
+  -moz-tab-size: 4;
+  cursor: text;
+  caret-color: var(--color-cobalt, #1558c9);
+  /* Enforce 1:1 character-to-column mapping: disable font ligatures to prevent caret jump/drift */
+  font-variant-ligatures: none !important;
+  font-feature-settings: "liga" 0, "calt" 0, "dlig" 0 !important;
+  -webkit-font-feature-settings: "liga" 0, "calt" 0, "dlig" 0 !important;
+  letter-spacing: normal;
+  word-spacing: normal;
+  word-break: normal;
+  word-wrap: normal;
 }
 
 .code-textarea::selection {
@@ -1642,4 +1661,51 @@ body.theme-cyberpunk .modal-close-btn:hover {
   background: rgba(255, 0, 85, 0.2);
   border-color: #ff0055;
   color: #ff0055;
+}
+
+/* ── Cyberpunk Editor Overrides & Cursor Tuning ───────────────────────────── */
+body.theme-cyberpunk .editor-wrapper {
+  background: #040712;
+  border-color: rgba(0, 240, 255, 0.22);
+}
+
+body.theme-cyberpunk .line-numbers {
+  background: #060916;
+  color: #475569;
+  border-right-color: rgba(0, 240, 255, 0.22);
+}
+
+body.theme-cyberpunk .code-textarea {
+  background: #040712;
+  color: #e2e8f0;
+  caret-color: #00f0ff;
+}
+
+body.theme-cyberpunk .code-textarea::selection {
+  background: rgba(0, 240, 255, 0.25);
+  color: #ffffff;
+}
+
+/* ── Interactive Line Badges & Diagnostic Location Navigation ────────────── */
+.diag-location,
+.line-badge {
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+  transition: all 0.15s ease;
+}
+
+.diag-location:hover {
+  text-decoration: underline;
+  color: var(--color-cobalt, #1558c9);
+}
+
+.code-overlay-block {
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.code-overlay-block:hover {
+  filter: brightness(0.96);
+  border-left-width: 4px;
 }

@@ -31,3 +31,4 @@ If you discover a security vulnerability within this project, please report it p
 - Do **NOT** file a public GitHub issue.
 - Please email the maintainer or submit a Private Security Advisory via GitHub.
 - You will receive an acknowledgment within 24 hours and a remediation update within 72 hours.
+

@@ -116,7 +116,7 @@ function initTabs() {
     });
 }
 
-// ── Line Number Sync ────────────────────────────────────────────────────────
+// ── Line Number Sync & Caret Handling ────────────────────────────────────────
 function initLineNumbers() {
     const codeEditor = document.getElementById("code-editor");
     const codeGutter = document.getElementById("code-gutter");
@@ -134,22 +134,109 @@ function initLineNumbers() {
         gutter.textContent = numbers;
     }
 
-    if (codeEditor && codeGutter) {
-        codeEditor.addEventListener("input", () => updateGutter(codeEditor, codeGutter));
-        codeEditor.addEventListener("scroll", () => {
-            codeGutter.scrollTop = codeEditor.scrollTop;
+    function setupEditor(editor, gutter) {
+        if (!editor) return;
+
+        // Smooth tab key indentation and caret management (prevents focus loss / caret jump)
+        editor.addEventListener("keydown", function(e) {
+            if (e.key === "Tab") {
+                e.preventDefault();
+                const start = this.selectionStart;
+                const end = this.selectionEnd;
+                const value = this.value;
+
+                if (e.shiftKey) {
+                    // Shift+Tab: Outdent by up to 4 spaces
+                    const lineStart = value.lastIndexOf("\n", start - 1) + 1;
+                    const lineEnd = value.indexOf("\n", end);
+                    const actualLineEnd = lineEnd === -1 ? value.length : lineEnd;
+                    const lines = value.substring(lineStart, actualLineEnd).split("\n");
+                    let removedChars = 0;
+                    let firstLineRemoved = 0;
+
+                    const newLines = lines.map((line, idx) => {
+                        const match = line.match(/^ {1,4}/);
+                        if (match) {
+                            const len = match[0].length;
+                            removedChars += len;
+                            if (idx === 0) firstLineRemoved = len;
+                            return line.substring(len);
+                        }
+                        return line;
+                    });
+
+                    this.value = value.substring(0, lineStart) + newLines.join("\n") + value.substring(actualLineEnd);
+                    this.selectionStart = Math.max(lineStart, start - firstLineRemoved);
+                    this.selectionEnd = Math.max(lineStart, end - removedChars);
+                } else {
+                    if (start === end) {
+                        // Single cursor: Insert 4 spaces at caret position
+                        const indent = "    ";
+                        this.value = value.substring(0, start) + indent + value.substring(end);
+                        this.selectionStart = this.selectionEnd = start + 4;
+                    } else {
+                        // Range selection: Indent all selected lines by 4 spaces
+                        const lineStart = value.lastIndexOf("\n", start - 1) + 1;
+                        const lineEnd = value.indexOf("\n", end);
+                        const actualLineEnd = lineEnd === -1 ? value.length : lineEnd;
+                        const lines = value.substring(lineStart, actualLineEnd).split("\n");
+                        const newLines = lines.map(line => "    " + line);
+                        const addedTotal = newLines.length * 4;
+
+                        this.value = value.substring(0, lineStart) + newLines.join("\n") + value.substring(actualLineEnd);
+                        this.selectionStart = start + 4;
+                        this.selectionEnd = end + addedTotal;
+                    }
+                }
+
+                if (gutter) updateGutter(editor, gutter);
+            }
         });
-        updateGutter(codeEditor, codeGutter);
+
+        // Synchronize scroll on input, scroll, keyup (arrow key navigation), and click
+        const syncScroll = () => {
+            if (gutter) gutter.scrollTop = editor.scrollTop;
+        };
+
+        editor.addEventListener("scroll", syncScroll);
+        editor.addEventListener("keyup", syncScroll);
+        editor.addEventListener("click", syncScroll);
+        editor.addEventListener("input", () => {
+            if (gutter) updateGutter(editor, gutter);
+            syncScroll();
+        });
+
+        if (gutter) updateGutter(editor, gutter);
     }
 
-    if (netlistEditor && netlistGutter) {
-        netlistEditor.addEventListener("input", () => updateGutter(netlistEditor, netlistGutter));
-        netlistEditor.addEventListener("scroll", () => {
-            netlistGutter.scrollTop = netlistEditor.scrollTop;
-        });
-        updateGutter(netlistEditor, netlistGutter);
-    }
+    setupEditor(codeEditor, codeGutter);
+    setupEditor(netlistEditor, netlistGutter);
 }
+
+// Jump editor caret focus to specific line/col
+function jumpToEditorLine(editorId, lineNum, colNum = 1) {
+    const editor = document.getElementById(editorId);
+    if (!editor) return;
+    const lines = editor.value.split("\n");
+    let targetIndex = 0;
+    const targetLine = Math.min(Math.max(1, lineNum), lines.length);
+    for (let i = 0; i < targetLine - 1; i++) {
+        targetIndex += lines[i].length + 1;
+    }
+    const lineLength = (lines[targetLine - 1] || "").length;
+    const colIndex = Math.min(Math.max(0, colNum - 1), lineLength);
+    const finalPos = targetIndex + colIndex;
+
+    editor.focus();
+    editor.setSelectionRange(finalPos, targetIndex + lineLength);
+
+    const approxLineHeight = 22;
+    editor.scrollTop = Math.max(0, (targetLine - 3) * approxLineHeight);
+    const gutterId = editorId === "code-editor" ? "code-gutter" : "netlist-gutter";
+    const gutter = document.getElementById(gutterId);
+    if (gutter) gutter.scrollTop = editor.scrollTop;
+}
+window.jumpToEditorLine = jumpToEditorLine;
 
 // ── Sample Code & Netlists ──────────────────────────────────────────────────
 const SAMPLES = {
@@ -482,14 +569,14 @@ function renderCodeResults(data, sourceCode) {
                         <span style="font-family: monospace; font-size: 11px; color: var(--text-dim);">${escapeHtml(h.rule_id)}</span>
                         ${secBadgeHtml}
                     </div>
-                    <span class="diag-location">Line ${lineNum}:${colNum}</span>
+                    <span class="diag-location" onclick="jumpToEditorLine('code-editor', ${lineNum}, ${colNum})" title="Click to jump cursor to line ${lineNum}">Line ${lineNum}:${colNum}</span>
                 </div>
 
                 <div class="diag-message">${escapeHtml(h.message)}</div>
                 ${agansBannerHtml}
                 ${causalHtml}
 
-                <div class="code-overlay-block">
+                <div class="code-overlay-block" onclick="jumpToEditorLine('code-editor', ${lineNum}, ${colNum})" title="Click to jump cursor to line ${lineNum}">
                     <span class="line-badge">Line ${lineNum}</span>
                     <code>${escapeHtml(codeLine.trim())}</code>
                 </div>
